@@ -263,6 +263,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="modern.css">
 </head>
 <body>
 <div class="app-container">
@@ -328,6 +329,24 @@
             <div id="heldBillsList" style="max-height:420px; overflow:auto; margin-top:8px;"></div>
             <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
                 <button id="closeHeldBillsBtn" class="secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Split Payment Modal -->
+    <div id="splitPaymentModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:2600;">
+        <div style="background:white; max-width:520px; width:94%; border-radius:12px; padding:18px;">
+            <h3>Split Payment</h3>
+            <div style="margin:8px 0; padding:10px; background:#f8fafc; border-radius:8px; font-weight:700;">Total: ₹<span id="splitPaymentTotal">0.00</span></div>
+            <div id="splitPaymentsList" style="max-height:240px; overflow:auto; margin:10px 0; border:1px solid #eef2f6; border-radius:8px; padding:8px;"></div>
+            <div style="display:flex; gap:8px; margin:10px 0;">
+                <select id="splitPaymentMode" style="padding:8px; border-radius:8px; border:1px solid #e2e8f0;"><option>Cash</option><option>UPI</option><option>Card</option><option>Cheque</option><option>Other</option></select>
+                <input type="number" id="splitPaymentAmount" placeholder="Amount (₹)" style="flex:1; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+                <button id="addSplitPaymentBtn" style="padding:8px 12px; border-radius:8px;">Add</button>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+                <button id="completeSplitPaymentBtn">Complete Sale</button>
+                <button id="cancelSplitPaymentBtn" class="secondary">Cancel</button>
             </div>
         </div>
     </div>
@@ -420,7 +439,10 @@
                 <h3>New Product</h3>
                 <input type="text" id="newSku" placeholder="SKU (unique)" style="margin:10px 0;">
                 <input type="text" id="newBarcode" placeholder="Barcode (optional)">
-                <input type="text" id="newImage" placeholder="Image URL (optional)">
+                <div style="display:flex; gap:8px; margin:10px 0;">
+                    <input type="text" id="newImage" placeholder="Image URL or upload" style="flex:1; margin:0;">
+                    <button id="uploadNewImageBtn" class="secondary" style="padding:8px 12px; border-radius:8px;" title="Upload Image"><i class="fas fa-upload"></i></button>
+                </div>
                 <input type="text" id="newName" placeholder="Product Name">
                 <input type="number" id="newCost" placeholder="Cost Price (₹)">
                 <input type="number" id="newMrp" placeholder="MRP (₹)">
@@ -503,8 +525,10 @@
     </div>
 </div>
 <div id="toastMsg" class="toast-msg" style="opacity:0; visibility:hidden;"></div>
+<input type="file" id="imageUploader" accept="image/*" style="display:none">
 
 <script>
+    let pendingUploadTarget = null;
     // ---------- DATA MODELS ----------
     let products = [  // initial inventory (cost, mrp, price = selling price, barcode)
         { sku: "P1001", barcode: "BC1001001", image: "", name: "Premium Notebook", cost: 70, mrp: 150, price: 120, stock: 34 },
@@ -526,6 +550,7 @@
     let gmailBackupEmail = localStorage.getItem("retail_gmail_backup") || "";
     let revenueChart = null;
     let heldBills = []; // array of held carts
+    let splitPayments = []; // array of { mode, amount } for current split payment
 
     // Helper: update backup display
     function updateBackupUI() {
@@ -595,14 +620,26 @@
             row.insertCell(6).innerText = `₹${Number(p.price||0).toFixed(2)}`;
             row.insertCell(7).innerHTML = `<span class="badge" style="${p.stock<=5?'background:#fee2e2;color:#b91c1c':''}">${p.stock}</span>`;
             const actions = row.insertCell(8);
+            const editImageBtn = document.createElement("button");
+            editImageBtn.innerHTML = '<i class="fas fa-image"></i>';
+            editImageBtn.title = 'Upload new image';
+            editImageBtn.style.background="#0ea5e9";
+            editImageBtn.style.padding="4px 10px";
+            editImageBtn.style.marginRight="8px";
+            editImageBtn.onclick = () => {
+                pendingUploadTarget = p.sku;
+                document.getElementById('imageUploader').click();
+            };
+            actions.appendChild(editImageBtn);
+
             const editBtn = document.createElement("button");
             editBtn.innerHTML = '<i class="fas fa-edit"></i>';
             editBtn.style.background="#334155";
             editBtn.style.padding="4px 10px";
             editBtn.style.marginRight="8px";
             editBtn.onclick = () => {
-                // allow editing image, barcode, stock, selling price, cost, and mrp via prompts
-                const newImage = prompt(`Edit image URL for ${p.name}`, p.image||''); if(newImage !== null) p.image = newImage.trim();
+                // allow editing name, barcode, stock, selling price, cost, and mrp via prompts
+                const newName = prompt(`Edit name for ${p.sku}`, p.name); if(newName !== null && newName.trim()!=='') p.name = newName.trim();
                 const newBarcode = prompt(`Edit barcode for ${p.name}`, p.barcode||''); if(newBarcode !== null) p.barcode = newBarcode.trim();
                 const newStock = prompt(`Edit stock for ${p.name}`, p.stock);
                 if(newStock !== null && !isNaN(parseInt(newStock))) p.stock = Math.max(0, parseInt(newStock));
@@ -619,6 +656,23 @@
                 checkLowStockAlerts();
             };
             actions.appendChild(editBtn);
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.style.background="#b91c1c";
+            deleteBtn.style.padding="4px 10px";
+            deleteBtn.onclick = () => {
+                if(confirm(`Are you sure you want to delete ${p.name}?`)) {
+                    products = products.filter(prod => prod.sku !== p.sku);
+                    currentCart = currentCart.filter(item => item.sku !== p.sku);
+                    persistData();
+                    renderInventoryTable();
+                    renderCartUI();
+                    updateAnalytics();
+                    checkLowStockAlerts();
+                }
+            };
+            actions.appendChild(deleteBtn);
         });
     }
 
@@ -1262,11 +1316,18 @@
 
     function showToast(msg, isError=false) {
         const toast = document.getElementById("toastMsg");
-        toast.innerText = msg;
-        toast.style.background = isError ? "#b91c1c" : "#1f2937";
-        toast.style.opacity = "1";
-        toast.style.visibility = "visible";
-        setTimeout(()=> { toast.style.opacity = "0"; toast.style.visibility = "hidden"; }, 3000);
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> <span>${msg}</span>`;
+        toast.style.background = isError ? "linear-gradient(135deg, #ef4444, #dc2626)" : "";
+        
+        toast.style.opacity = '1';
+        toast.style.visibility = 'visible';
+        toast.classList.add('show');
+
+        setTimeout(()=> { 
+            toast.classList.remove('show'); 
+            // wait for transition to finish before hiding totally
+            setTimeout(()=> { toast.style.opacity = "0"; toast.style.visibility = "hidden"; }, 400);
+        }, 3000);
     }
 
     // Initialize tax UI elements and wire events
@@ -1401,8 +1462,141 @@
         const mode = document.getElementById("paymentMode").value;
         completeSale(mode);
     });
+
+    // Split Payment Logic
+    document.getElementById("splitPaymentBtn")?.addEventListener("click", () => {
+        if(currentCart.length === 0) { showToast("Cart empty", true); return; }
+        
+        const subtotal = currentCart.reduce((s,i)=> s+(i.price*i.qty),0);
+        let discountAmount = 0;
+        if(discountType === 'percent') discountAmount = subtotal * (discountValue/100);
+        else discountAmount = discountValue || 0;
+        if(discountAmount < 0) discountAmount = 0;
+        if(discountAmount > subtotal) discountAmount = subtotal;
+        const taxableBase = Math.max(0, subtotal - discountAmount);
+        const tax = taxEnabled ? taxableBase * (taxRate/100) : 0;
+        const total = taxableBase + tax;
+        
+        splitPayments = [];
+        document.getElementById("splitPaymentTotal").innerText = total.toFixed(2);
+        renderSplitPayments();
+        
+        document.getElementById("splitPaymentAmount").value = total.toFixed(2);
+        document.getElementById("splitPaymentModal").style.display = "flex";
+    });
+
+    function renderSplitPayments() {
+        const list = document.getElementById("splitPaymentsList");
+        if(!list) return;
+        if(splitPayments.length === 0) { list.innerHTML = '<div class="badge">No payments added</div>'; return; }
+        let html = '<table style="width:100%">';
+        let totalPaid = 0;
+        splitPayments.forEach((p, idx) => {
+            html += `<tr><td>${p.mode}</td><td>₹${p.amount.toFixed(2)}</td><td style="text-align:right"><button class="removeSplitBtn" data-idx="${idx}" style="background:#ef4444;padding:2px 6px;border-radius:4px;color:white;border:none;cursor:pointer;">X</button></td></tr>`;
+            totalPaid += p.amount;
+        });
+        html += `</table><div style="margin-top:8px; font-weight:bold; text-align:right">Total Paid: ₹${totalPaid.toFixed(2)}</div>`;
+        list.innerHTML = html;
+        
+        document.querySelectorAll(".removeSplitBtn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idx = parseInt(btn.dataset.idx);
+                splitPayments.splice(idx, 1);
+                renderSplitPayments();
+            });
+        });
+    }
+
+    document.getElementById("addSplitPaymentBtn")?.addEventListener("click", () => {
+        const mode = document.getElementById("splitPaymentMode").value;
+        const amount = parseFloat(document.getElementById("splitPaymentAmount").value);
+        if(isNaN(amount) || amount <= 0) { showToast("Enter a valid amount", true); return; }
+        
+        splitPayments.push({ mode, amount });
+        
+        const subtotal = currentCart.reduce((s,i)=> s+(i.price*i.qty),0);
+        let discountAmount = 0;
+        if(discountType === 'percent') discountAmount = subtotal * (discountValue/100);
+        else discountAmount = discountValue || 0;
+        if(discountAmount < 0) discountAmount = 0;
+        if(discountAmount > subtotal) discountAmount = subtotal;
+        const taxableBase = Math.max(0, subtotal - discountAmount);
+        const tax = taxEnabled ? taxableBase * (taxRate/100) : 0;
+        const total = taxableBase + tax;
+        
+        const totalPaid = splitPayments.reduce((s, p) => s + p.amount, 0);
+        const remaining = total - totalPaid;
+        
+        if (remaining > 0) {
+            document.getElementById("splitPaymentAmount").value = remaining.toFixed(2);
+        } else {
+            document.getElementById("splitPaymentAmount").value = "";
+        }
+        
+        renderSplitPayments();
+    });
+
+    document.getElementById("cancelSplitPaymentBtn")?.addEventListener("click", () => {
+        document.getElementById("splitPaymentModal").style.display = "none";
+    });
+
+    document.getElementById("completeSplitPaymentBtn")?.addEventListener("click", () => {
+        const subtotal = currentCart.reduce((s,i)=> s+(i.price*i.qty),0);
+        let discountAmount = 0;
+        if(discountType === 'percent') discountAmount = subtotal * (discountValue/100);
+        else discountAmount = discountValue || 0;
+        if(discountAmount < 0) discountAmount = 0;
+        if(discountAmount > subtotal) discountAmount = subtotal;
+        const taxableBase = Math.max(0, subtotal - discountAmount);
+        const tax = taxEnabled ? taxableBase * (taxRate/100) : 0;
+        const total = taxableBase + tax;
+        
+        const totalPaid = splitPayments.reduce((s, p) => s + p.amount, 0);
+        
+        if(Math.abs(total - totalPaid) > 0.05) {
+            showToast(`Total paid (₹${totalPaid.toFixed(2)}) must equal bill total (₹${total.toFixed(2)})`, true);
+            return;
+        }
+        
+        const modeStr = "Split: " + splitPayments.map(p => `${p.mode} ₹${p.amount.toFixed(2)}`).join(", ");
+        document.getElementById("splitPaymentModal").style.display = "none";
+        completeSale(modeStr);
+    });
     document.getElementById("configureGmailBtn")?.addEventListener("click",configureGmail);
     document.getElementById("manualBackupBtn")?.addEventListener("click",manualBackup);
+    
+    // Image Uploader Logic
+    document.getElementById("uploadNewImageBtn")?.addEventListener("click", () => {
+        pendingUploadTarget = 'new';
+        document.getElementById("imageUploader").click();
+    });
+    
+    document.getElementById("imageUploader")?.addEventListener("change", function(e) {
+        if(!this.files || !this.files[0]) return;
+        const file = this.files[0];
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const base64 = evt.target.result;
+            if(pendingUploadTarget === 'new') {
+                const imgInp = document.getElementById("newImage");
+                if(imgInp) imgInp.value = base64;
+                showToast("Image selected for new product");
+            } else if(pendingUploadTarget) {
+                const prod = products.find(p => p.sku === pendingUploadTarget);
+                if(prod) {
+                    prod.image = base64;
+                    persistData();
+                    renderInventoryTable();
+                    renderCartUI();
+                    showToast("Product image updated");
+                }
+            }
+            pendingUploadTarget = null;
+            document.getElementById("imageUploader").value = "";
+        };
+        reader.readAsDataURL(file);
+    });
+
     document.getElementById("showAddProductModalBtn")?.addEventListener("click",()=>{
         document.getElementById("productModal").style.display = "flex";
     });
