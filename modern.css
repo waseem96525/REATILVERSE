@@ -249,3 +249,87 @@ div[id$="Modal"] {
         opacity: 1;
     }
 }
+
+/* Responsive Mobile & Tablet Design */
+@media (max-width: 900px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        padding: 16px 20px;
+    }
+    
+    .logo-area {
+        text-align: center;
+    }
+
+    .backup-panel {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .tabs {
+        justify-content: center;
+    }
+
+    .tab-btn {
+        flex: 1 1 45%;
+        justify-content: center;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .grid-2col {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: span 1;
+    }
+
+    div[style*="overflow-x: auto"] {
+        width: 100%;
+        margin-top: 10px;
+        border-radius: 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 700px;
+    }
+
+    .card {
+        padding: 20px 16px;
+    }
+
+    div[id$="Modal"] > div {
+        padding: 16px !important;
+        margin: 10px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+    
+    .toast-msg {
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .tab-btn {
+        flex: 1 1 100%;
+    }
+    
+    .backup-panel button {
+        flex: 1 1 45%;
+        justify-content: center;
+    }
+}
