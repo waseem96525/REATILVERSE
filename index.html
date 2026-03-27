@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Advanced Retail Suite | Billing & Inventory with Gmail Backup</title>
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts: Inter & Space Grotesk -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN for analytics visuals -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f0f4f8;
+            padding: 24px 20px;
+            color: #1e293b;
+        }
+
+        /* Glassmorphic dashboard container */
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* header with backup indicator */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            background: white;
+            padding: 16px 28px;
+            border-radius: 40px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .logo-area h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1E3C72, #2A5298);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-area p {
+            font-size: 0.8rem;
+            color: #5b6e8c;
+        }
+
+        .backup-panel {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: #f8fafc;
+            padding: 8px 20px;
+            border-radius: 60px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .gmail-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .btn-backup {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-backup:hover {
+            background: #0f172a;
+            transform: scale(0.97);
+        }
+
+        /* Tab navigation */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            color: #334155;
+        }
+
+        .tab-btn i {
+            font-size: 1.1rem;
+        }
+
+        .tab-btn.active {
+            background: #1e3c72;
+            color: white;
+            box-shadow: 0 8px 18px rgba(30,60,114,0.25);
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fade 0.25s ease;
+        }
+
+        .tab-pane.active-pane {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(5px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* Cards and grids */
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f6;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        input, select, button {
+            outline: none;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 1.5px solid #e2e8f0;
+            background: #fefefe;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        input:focus, select:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42,82,152,0.2);
+        }
+
+        button {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button.secondary {
+            background: #eef2ff;
+            color: #1e3c72;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .badge {
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .total-amount {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e3c72;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1f2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            z-index: 1000;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: opacity 0.3s;
+        }
+
+        .danger-btn {
+            background: #b91c1c;
+        }
+
+        @media (max-width: 800px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="logo-area">
+            <h1><i class="fas fa-store"></i> RetailVerse <span style="font-weight:400">| Billing + Inventory</span></h1>
+            <p>Advanced POS • Real-time stock • Gmail Cloud Backup</p>
+        </div>
+        <!-- Exchange Modal -->
+        <div id="exchangeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:2300;">
+            <div style="background:white; max-width:900px; width:96%; border-radius:12px; padding:18px;">
+                <h3 style="margin-bottom:8px;">Process Exchange</h3>
+                <div style="display:flex; gap:16px;">
+                    <div style="flex:1; min-width:220px;">
+                        <h4>Returned Items</h4>
+                        <div id="exchangeOriginalList" style="max-height:220px; overflow:auto; padding:8px; border:1px solid #eef2f6; border-radius:8px;"></div>
+                        <div style="margin-top:8px; font-weight:700; text-align:right;">Original Total: <span id="exchangeOriginalTotal">₹0.00</span></div>
+                    </div>
+                    <div style="flex:1;">
+                        <h4>Select Replacement Items</h4>
+                        <input id="exchangeSearchInput" placeholder="Search product by SKU or name" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+                        <div id="exchangeSuggestions" style="max-height:160px; overflow:auto; margin-top:6px;"></div>
+                        <div id="exchangeCartList" style="margin-top:10px; max-height:220px; overflow:auto;"></div>
+                        <div style="margin-top:8px; text-align:right; font-weight:800;">Replacement Total: <span id="exchangeReplacementTotal">₹0.00</span></div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+                    <button id="applyExchangeBtn">Apply Exchange</button>
+                    <button id="cancelExchangeBtn" class="secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div class="backup-panel">
+            <div class="gmail-status"><i class="fas fa-envelope"></i> <span id="backupEmailStatus">Not configured</span></div>
+            <button id="configureGmailBtn" class="btn-backup"><i class="fab fa-google"></i> Link Gmail</button>
+            <button id="manualBackupBtn" class="btn-backup"><i class="fas fa-database"></i> Backup Now</button>
+            <button id="openHeldBillsBtn" class="btn-backup"><i class="fas fa-pause-circle"></i> Held Bills</button>
+            <button id="openSettingsBtn" class="btn-backup" style="background:#0f172a;"><i class="fas fa-cog"></i> Settings</button>
+            <button id="exitAppBtn" class="btn-backup" style="background:#b91c1c;"><i class="fas fa-sign-out-alt"></i> Exit</button>
+        </div>
+    </div>
+
+    <!-- Sales Report Modal -->
+    <div id="reportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:2400;">
+        <div style="background:white; max-width:820px; width:94%; border-radius:12px; padding:18px;">
+            <h3>Sales Report</h3>
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:10px;">
+                <div>From: <input type="date" id="reportStart" style="padding:6px; border-radius:6px; border:1px solid #e2e8f0;"></div>
+                <div>To: <input type="date" id="reportEnd" style="padding:6px; border-radius:6px; border:1px solid #e2e8f0;"></div>
+                <button id="generateReportBtn">Generate</button>
+                <button id="downloadReportBtn" class="secondary">Download CSV</button>
+                <button id="closeReportBtn" class="secondary" style="margin-left:auto;">Close</button>
+            </div>
+            <div id="reportSummary" style="margin-top:8px;"></div>
+            <div id="reportTable" style="margin-top:12px; max-height:360px; overflow:auto;"></div>
+        </div>
+    </div>
+
+    <!-- Held Bills Modal -->
+    <div id="heldBillsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:2500;">
+        <div style="background:white; max-width:760px; width:94%; border-radius:12px; padding:18px;">
+            <h3>Held Bills</h3>
+            <div id="heldBillsList" style="max-height:420px; overflow:auto; margin-top:8px;"></div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+                <button id="closeHeldBillsBtn" class="secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="billing"><i class="fas fa-receipt"></i> Smart Billing</button>
+        <button class="tab-btn" data-tab="inventory"><i class="fas fa-boxes"></i> Inventory Manager</button>
+        <button class="tab-btn" data-tab="analytics"><i class="fas fa-chart-line"></i> Analytics & Insights</button>
+        <button class="tab-btn" data-tab="history"><i class="fas fa-history"></i> Transaction History</button>
+    </div>
+
+    <!-- Billing Pane -->
+    <div id="billingPane" class="tab-pane active-pane">
+        <div class="grid-2col">
+            <div class="card">
+                <h3><i class="fas fa-cart-plus"></i> New Sale</h3>
+                <div class="form-group">
+                    <label>Product SKU / Name</label>
+                    <input type="text" id="productSearchInput" placeholder="Search or scan product...">
+                    <div id="searchSuggestions" style="background:white; border-radius: 16px; margin-top: 6px;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" id="billQty" value="1" min="1">
+                </div>
+                <button id="addToCartBtn"><i class="fas fa-plus-circle"></i> Add Item</button>
+                <hr style="margin: 20px 0;">
+                <div id="cartItemsList" style="max-height: 280px; overflow-y: auto;">
+                    <p class="badge">Cart empty</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-calculator"></i> Checkout</h3>
+                <div><strong>Subtotal:</strong> ₹<span id="cartSubtotal">0.00</span></div>
+                <div><strong>Discount:</strong> <span id="cartDiscount">-₹0.00</span></div>
+                <div><strong>Tax (<span id="taxLabel">GST 5%</span>):</strong> ₹<span id="cartTax">0.00</span></div>
+                <div style="margin-top:10px; display:flex; gap:12px; align-items:center;">
+                    <label style="font-weight:600; margin-right:8px;">Apply Tax</label>
+                    <input type="checkbox" id="taxEnabledCheckbox" checked style="width:18px; height:18px;">
+                    <div style="flex:1; display:flex; gap:10px; align-items:center;">
+                        <label style="min-width:64px;">Rate:</label>
+                        <input type="range" id="taxRateSlider" min="0" max="30" step="0.5" value="5" style="flex:1">
+                        <div style="min-width:56px; text-align:right; font-weight:700;"> <span id="taxRateValue">5</span>%</div>
+                    </div>
+                </div>
+                <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+                    <select id="discountType" style="padding:8px;border-radius:10px;border:1px solid #e2e8f0;">
+                        <option value="percent">Percent</option>
+                        <option value="fixed">Fixed</option>
+                    </select>
+                    <input type="number" id="discountValueInput" value="0" min="0" style="width:120px;padding:8px;border-radius:10px;border:1px solid #e2e8f0;">
+                    <div style="font-size:0.9rem;color:#475569">(Discount applied before tax)</div>
+                </div>
+                <div style="font-size: 1.6rem; font-weight:800;">Total: ₹<span id="cartTotal">0.00</span></div>
+                <div class="form-group mt-2">
+                    <label>Payment Mode</label>
+                    <select id="paymentMode">
+                        <option>Cash</option>
+                        <option>UPI</option>
+                        <option>Card</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button id="completeSaleBtn" style="flex:1;"><i class="fas fa-check-circle"></i> Complete Sale</button>
+                    <button id="splitPaymentBtn" class="secondary" style="min-width:130px;"><i class="fas fa-divide"></i> Split Payment</button>
+                    <button id="holdBillBtn" class="secondary" style="min-width:140px;"><i class="fas fa-pause-circle"></i> Hold Bill</button>
+                    <button id="printDraftBtn" class="secondary" style="min-width:140px;"><i class="fas fa-print"></i> Print Draft</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Pane -->
+    <div id="inventoryPane" class="tab-pane">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap:12px;">
+                <h3><i class="fas fa-archive"></i> Product Master</h3>
+                <button id="showAddProductModalBtn" style="background:#2c6e2f;"><i class="fas fa-plus"></i> Add New Product</button>
+            </div>
+            <div style="overflow-x: auto; margin-top: 20px;">
+                <table id="inventoryTable">
+                    <thead><tr><th>SKU</th><th>Image</th><th>Barcode</th><th>Name</th><th>Cost (₹)</th><th>MRP (₹)</th><th>Selling (₹)</th><th>Stock</th><th>Actions</th></tr></thead>
+                    <tbody id="inventoryTbody"></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- hidden modal for new product (inline) -->
+        <div id="productModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2000;">
+            <div style="background:white; max-width:450px; width:90%; border-radius:32px; padding:24px;">
+                <h3>New Product</h3>
+                <input type="text" id="newSku" placeholder="SKU (unique)" style="margin:10px 0;">
+                <input type="text" id="newBarcode" placeholder="Barcode (optional)">
+                <input type="text" id="newImage" placeholder="Image URL (optional)">
+                <input type="text" id="newName" placeholder="Product Name">
+                <input type="number" id="newCost" placeholder="Cost Price (₹)">
+                <input type="number" id="newMrp" placeholder="MRP (₹)">
+                <input type="number" id="newPrice" placeholder="Selling Price (₹)">
+                <input type="number" id="newStock" placeholder="Initial Stock">
+                <div style="display:flex; gap:12px; margin-top:20px;">
+                    <button id="confirmAddProduct">Add Product</button>
+                    <button id="closeModalBtn" class="secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2100;">
+            <div style="background:white; max-width:520px; width:92%; border-radius:20px; padding:20px;">
+                <h3>Shop Settings</h3>
+                <div style="margin:8px 0;"><input id="shopNameInput" placeholder="Shop name" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0"></div>
+                <div style="margin:8px 0;"><input id="shopAddressInput" placeholder="Address" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0"></div>
+                <div style="margin:8px 0; display:flex; gap:8px;"><input id="shopPhoneInput" placeholder="Phone" style="flex:1; padding:8px; border-radius:8px; border:1px solid #e2e8f0"><input id="shopLogoInput" placeholder="Logo URL (optional)" style="flex:2; padding:8px; border-radius:8px; border:1px solid #e2e8f0"></div>
+                    <div style="margin-top:10px; border-top:1px dashed #e6eef8; padding-top:10px;">
+                        <h4 style="margin-bottom:6px;">Email Attachment (EmailJS)</h4>
+                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;"><input type="checkbox" id="emailJsEnabled" style="width:16px;height:16px;margin-right:6px;"> <div style="font-size:0.95rem; color:#334155">Enable sending backup as attachment via EmailJS</div></div>
+                        <input id="emailJsService" placeholder="EmailJS Service ID" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
+                        <input id="emailJsTemplate" placeholder="EmailJS Template ID" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
+                        <input id="emailJsUser" placeholder="EmailJS User ID" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+                    </div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+                    <button id="saveSettingsBtn">Save</button>
+                    <button id="closeSettingsBtn" class="secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exit Confirmation Modal -->
+        <div id="exitConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
+            <div style="background:white; max-width:380px; width:90%; border-radius:12px; padding:18px; text-align:center;">
+                <h3 style="margin-bottom:8px;">Confirm Exit</h3>
+                <p style="color:#334155;">Are you sure you want to exit the app?</p>
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:14px;">
+                    <button id="confirmExitBtn" style="background:#b91c1c;">Exit</button>
+                    <button id="cancelExitBtn" class="secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Pane -->
+    <div id="analyticsPane" class="tab-pane">
+        <div class="grid-2col">
+            <div class="card">
+                <h3>Revenue Overview</h3>
+                <canvas id="revenueChart" width="400" height="200" style="max-height:250px;"></canvas>
+                    <div style="margin-top:10px; display:flex; gap:8px;">
+                        <button id="openReportBtn" class="secondary" style="margin-left:auto;">Sales Report</button>
+                    </div>
+            </div>
+            <div class="card">
+                <h3>Top Selling Products</h3>
+                <ul id="topProductsList"></ul>
+            </div>
+            <div class="card full-width">
+                <h3>Low Stock Alerts (≤ 5 items)</h3>
+                <div id="lowStockAlertList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Pane -->
+    <div id="historyPane" class="tab-pane">
+        <div class="card">
+            <h3><i class="fas fa-receipt"></i> Past Transactions</h3>
+            <input type="text" id="searchHistoryInput" placeholder="Search by bill ID or product..." style="margin-bottom: 15px;">
+            <div style="overflow-x: auto;">
+                <table id="historyTable">
+                    <thead><tr><th>Bill ID</th><th>Date</th><th>Items</th><th>Total (₹)</th><th>Payment</th><th>Actions</th></tr></thead>
+                    <tbody id="historyTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg" style="opacity:0; visibility:hidden;"></div>
+
+<script>
+    // ---------- DATA MODELS ----------
+    let products = [  // initial inventory (cost, mrp, price = selling price, barcode)
+        { sku: "P1001", barcode: "BC1001001", image: "", name: "Premium Notebook", cost: 70, mrp: 150, price: 120, stock: 34 },
+        { sku: "P1002", barcode: "BC1001002", image: "", name: "Gel Pen (Pack)", cost: 40, mrp: 95, price: 85, stock: 52 },
+        { sku: "P1003", barcode: "BC1001003", image: "", name: "Wireless Mouse", cost: 350, mrp: 699, price: 599, stock: 12 },
+        { sku: "P1004", barcode: "BC1001004", image: "", name: "USB-C Cable", cost: 120, mrp: 349, price: 299, stock: 8 },
+        { sku: "P1005", barcode: "BC1001005", image: "", name: "Desk Lamp", cost: 800, mrp: 1599, price: 1450, stock: 3 }
+    ];
+    let transactions = [];  // each: { billId, date, items: [{sku,name,qty,price}], total, paymentMode }
+    let currentCart = [];   // { sku, name, qty, price }
+    // tax settings (percentage)
+    let taxRate = 5; // percent
+    let taxEnabled = true;
+    // discount settings
+    let discountType = 'percent'; // 'percent' or 'fixed'
+    let discountValue = 0; // number: percent or fixed amount
+    let shopInfo = { name: '', address: '', phone: '', logo: '' };
+    let emailJsConfig = { enabled: false, serviceId: '', templateId: '', userId: '' };
+    let gmailBackupEmail = localStorage.getItem("retail_gmail_backup") || "";
+    let revenueChart = null;
+    let heldBills = []; // array of held carts
+
+    // Helper: update backup display
+    function updateBackupUI() {
+        const statusSpan = document.getElementById("backupEmailStatus");
+        if(gmailBackupEmail && gmailBackupEmail.includes("@")) {
+            statusSpan.innerHTML = `<i class="fas fa-check-circle" style="color:#22c55e;"></i> ${gmailBackupEmail}`;
+        } else {
+            statusSpan.innerHTML = `<i class="fas fa-exclamation-triangle"></i> No Gmail linked`;
+        }
+    }
+
+    // Save to localStorage (full state)
+    function persistData() {
+        const state = { products, transactions, gmailBackupEmail, taxRate, taxEnabled, shopInfo, discountType, discountValue, emailJsConfig, heldBills };
+        localStorage.setItem("retail_suite_data", JSON.stringify(state));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem("retail_suite_data");
+        if(saved) {
+            try {
+                const data = JSON.parse(saved);
+                products = data.products || products;
+                transactions = data.transactions || transactions;
+                gmailBackupEmail = data.gmailBackupEmail || "";
+                // load tax settings if present
+                taxRate = typeof data.taxRate === 'number' ? data.taxRate : taxRate;
+                taxEnabled = typeof data.taxEnabled === 'boolean' ? data.taxEnabled : taxEnabled;
+                // load shop info if present
+                shopInfo = data.shopInfo || shopInfo;
+                // load discount settings
+                discountType = data.discountType || discountType;
+                discountValue = typeof data.discountValue === 'number' ? data.discountValue : discountValue;
+                // load EmailJS config
+                emailJsConfig = data.emailJsConfig || emailJsConfig;
+                // load held bills
+                heldBills = data.heldBills || heldBills;
+                localStorage.setItem("retail_gmail_backup", gmailBackupEmail);
+            } catch(e) {}
+        }
+        updateBackupUI();
+        initializeTaxUI();
+        initializeSettingsUI();
+        renderInventoryTable();
+        renderCartUI();
+        renderHistory();
+        updateAnalytics();
+        checkLowStockAlerts();
+    }
+
+    // render inventory table
+    function renderInventoryTable() {
+        const tbody = document.getElementById("inventoryTbody");
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        products.forEach((p, idx) => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = p.sku;
+            // image thumbnail
+            const imgCell = row.insertCell(1);
+            if(p.image) imgCell.innerHTML = `<img src="${p.image}" onerror="this.style.display='none'" style="height:36px;width:36px;object-fit:cover;border-radius:6px;">`;
+            else imgCell.innerHTML = `<div style="height:36px;width:36px;background:#f1f5f9;border-radius:6px;display:inline-block;"></div>`;
+            row.insertCell(2).innerText = p.barcode || '';
+            row.insertCell(3).innerText = p.name;
+            row.insertCell(4).innerText = `₹${Number(p.cost||0).toFixed(2)}`;
+            row.insertCell(5).innerText = `₹${Number(p.mrp||0).toFixed(2)}`;
+            row.insertCell(6).innerText = `₹${Number(p.price||0).toFixed(2)}`;
+            row.insertCell(7).innerHTML = `<span class="badge" style="${p.stock<=5?'background:#fee2e2;color:#b91c1c':''}">${p.stock}</span>`;
+            const actions = row.insertCell(8);
+            const editBtn = document.createElement("button");
+            editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            editBtn.style.background="#334155";
+            editBtn.style.padding="4px 10px";
+            editBtn.style.marginRight="8px";
+            editBtn.onclick = () => {
+                // allow editing image, barcode, stock, selling price, cost, and mrp via prompts
+                const newImage = prompt(`Edit image URL for ${p.name}`, p.image||''); if(newImage !== null) p.image = newImage.trim();
+                const newBarcode = prompt(`Edit barcode for ${p.name}`, p.barcode||''); if(newBarcode !== null) p.barcode = newBarcode.trim();
+                const newStock = prompt(`Edit stock for ${p.name}`, p.stock);
+                if(newStock !== null && !isNaN(parseInt(newStock))) p.stock = Math.max(0, parseInt(newStock));
+                const newPrice = prompt(`Edit selling price for ${p.name} (₹)`, p.price);
+                if(newPrice !== null && !isNaN(parseFloat(newPrice))) p.price = parseFloat(newPrice);
+                const newCost = prompt(`Edit cost price for ${p.name} (₹)`, p.cost||0);
+                if(newCost !== null && !isNaN(parseFloat(newCost))) p.cost = parseFloat(newCost);
+                const newMrp = prompt(`Edit MRP for ${p.name} (₹)`, p.mrp||0);
+                if(newMrp !== null && !isNaN(parseFloat(newMrp))) p.mrp = parseFloat(newMrp);
+                persistData();
+                renderInventoryTable();
+                renderCartUI(); 
+                updateAnalytics();
+                checkLowStockAlerts();
+            };
+            actions.appendChild(editBtn);
+        });
+    }
+
+    // cart helpers
+    function renderCartUI() {
+        const container = document.getElementById("cartItemsList");
+        if(!container) return;
+        if(currentCart.length === 0) { container.innerHTML = "<p class='badge'>Cart empty</p>"; updateCartTotals(); return; }
+        let html = `<table style="width:100%"><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr>`;
+        currentCart.forEach((item, idx) => {
+            html += `<tr>
+                        <td>${item.name} (${item.sku})</td>
+                        <td><input type="number" class="cartQtyUpdate" data-idx="${idx}" value="${item.qty}" min="1" style="width:70px"></td>
+                        <td>₹${item.price}</td>
+                        <td>₹${(item.qty * item.price).toFixed(2)}</td>
+                        <td><button class="removeCartItem" data-idx="${idx}" style="background:#b91c1c;padding:4px 10px;">X</button></td>
+                      </tr>`;
+        });
+        html += `</table>`;
+        container.innerHTML = html;
+        document.querySelectorAll(".cartQtyUpdate").forEach(inp => {
+            inp.addEventListener("change", (e) => {
+                const idx = parseInt(inp.dataset.idx);
+                const newQty = parseInt(inp.value);
+                if(!isNaN(newQty) && newQty>0) {
+                    const productFound = products.find(p => p.sku === currentCart[idx].sku);
+                    if(productFound && newQty <= productFound.stock) {
+                        currentCart[idx].qty = newQty;
+                    } else {
+                        alert(`Only ${productFound?.stock || 0} in stock!`);
+                        inp.value = currentCart[idx].qty;
+                    }
+                    renderCartUI();
+                }
+            });
+        });
+        document.querySelectorAll(".removeCartItem").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                currentCart.splice(idx,1);
+                renderCartUI();
+            });
+        });
+        updateCartTotals();
+    }
+
+    function updateCartTotals() {
+        let subtotal = currentCart.reduce((sum,it)=> sum + (it.price * it.qty),0);
+        // discount
+        let discountAmount = 0;
+        if(discountType === 'percent') discountAmount = subtotal * (discountValue/100);
+        else discountAmount = discountValue || 0;
+        if(discountAmount < 0) discountAmount = 0;
+        if(discountAmount > subtotal) discountAmount = subtotal;
+        const taxableBase = Math.max(0, subtotal - discountAmount);
+        let tax = taxEnabled ? taxableBase * (taxRate/100) : 0;
+        let total = taxableBase + tax;
+        document.getElementById("cartSubtotal").innerText = subtotal.toFixed(2);
+        // ensure cartDiscount element exists before setting
+        const discEl = document.getElementById('cartDiscount');
+        if(discEl) discEl.innerText = `-₹${discountAmount.toFixed(2)}`;
+        document.getElementById("cartTax").innerText = tax.toFixed(2);
+        document.getElementById("cartTotal").innerText = total.toFixed(2);
+        const label = document.getElementById('taxLabel');
+        if(label) label.innerText = taxEnabled ? `GST ${taxRate}%` : 'Tax Disabled';
+    }
+
+    // add to cart with stock validation
+    function addToCart(sku, qty) {
+        const prod = products.find(p => p.sku === sku);
+        if(!prod) { showToast("Product not found"); return false; }
+        if(prod.stock < qty) { showToast(`Insufficient stock! Only ${prod.stock} left.`); return false; }
+        const existing = currentCart.find(i => i.sku === sku);
+        if(existing) {
+            if(prod.stock < existing.qty + qty) { showToast(`Cannot add more than stock limit.`); return false; }
+            existing.qty += qty;
+        } else {
+            currentCart.push({ sku: prod.sku, name: prod.name, qty: qty, price: prod.price });
+        }
+        renderCartUI();
+        return true;
+    }
+
+    // complete sale
+    function completeSale(paymentMode) {
+        if(currentCart.length === 0) { showToast("Cart empty", true); return; }
+        let subtotal = currentCart.reduce((s,i)=> s+(i.price*i.qty),0);
+        // compute discount
+        let discountAmount = 0;
+        if(discountType === 'percent') discountAmount = subtotal * (discountValue/100);
+        else discountAmount = discountValue || 0;
+        if(discountAmount < 0) discountAmount = 0;
+        if(discountAmount > subtotal) discountAmount = subtotal;
+        const taxableBase = Math.max(0, subtotal - discountAmount);
+        let tax = taxEnabled ? taxableBase * (taxRate/100) : 0;
+        let total = taxableBase + tax;
+        // deduct stock
+        for(let item of currentCart) {
+            const prod = products.find(p => p.sku === item.sku);
+            if(prod) {
+                if(prod.stock < item.qty) { showToast(`Stock reduced for ${prod.name}`, true); return; }
+                prod.stock -= item.qty;
+            }
+        }
+        const billId = "INV" + Date.now() + Math.floor(Math.random()*1000);
+        const newTransaction = {
+            billId: billId,
+            date: new Date().toLocaleString(),
+            timestamp: Date.now(),
+            items: currentCart.map(i=>({sku:i.sku, name:i.name, qty:i.qty, price:i.price})),
+            subtotal: subtotal,
+            discount: { type: discountType, value: discountValue, amount: discountAmount },
+            tax: tax,
+            total: total,
+            paymentMode: paymentMode
+        };
+        transactions.unshift(newTransaction);
+        persistData();
+        // Print the receipt for the completed transaction
+        try { printReceipt(newTransaction); } catch(e) { console.error(e); }
+        currentCart = [];
+        renderInventoryTable();
+        renderCartUI();
+        renderHistory();
+        updateAnalytics();
+        checkLowStockAlerts();
+        showToast(`Sale complete! Bill ${billId} ₹${total.toFixed(2)}`);
+        // after sale auto backup if gmail configured? optional
+        if(gmailBackupEmail) autoBackupToGmail(billId);
+    }
+
+    // Print a completed transaction receipt
+    function printReceipt(transaction) {
+        const win = window.open('', '_blank', 'width=600,height=700');
+        if(!win) { showToast('Popup blocked. Allow popups to print.', true); return; }
+        const itemsHtml = transaction.items.map(i=>`<tr><td>${i.name} (${i.sku})</td><td style="text-align:center;">${i.qty}</td><td style="text-align:right;">₹${i.price.toFixed(2)}</td><td style="text-align:right;">₹${(i.qty*i.price).toFixed(2)}</td></tr>`).join('');
+        const headerHtml = shopInfo && (shopInfo.name || shopInfo.address || shopInfo.phone || shopInfo.logo) ? (`<div style="text-align:center; margin-bottom:8px;">
+            ${shopInfo.logo ? `<img src="${shopInfo.logo}" alt="logo" style="max-height:60px; display:block; margin:0 auto 6px;">` : ''}
+            ${shopInfo.name ? `<div style="font-weight:800; font-size:1.1rem;">${shopInfo.name}</div>` : ''}
+            ${shopInfo.address ? `<div style="font-size:0.85rem; color:#333;">${shopInfo.address}</div>` : ''}
+            ${shopInfo.phone ? `<div style="font-size:0.85rem; color:#333;">Phone: ${shopInfo.phone}</div>` : ''}
+        </div>`) : `<h2 style="text-align:center;">RetailVerse</h2>`;
+        const discountLine = transaction.discount ? `<div style="text-align:right;font-weight:700;">Discount: -₹${(transaction.discount.amount||0).toFixed(2)}</div>` : '';
+        const html = `<!doctype html><html><head><title>Receipt ${transaction.billId}</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid #ddd}h2{text-align:center}</style></head><body>${headerHtml}<div>Bill: ${transaction.billId}</div><div>Date: ${transaction.date}</div><table><thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>${discountLine}<div style="margin-top:12px;text-align:right;font-weight:700;">Tax: ₹${(transaction.tax||0).toFixed(2)}</div><div style="margin-top:6px;text-align:right;font-weight:900;">Total: ₹${transaction.total.toFixed(2)}</div><div style="margin-top:24px;text-align:center;">Thank you for shopping!</div></body></html>`;
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        // wait a bit for rendering then trigger print
+        setTimeout(()=>{ try { win.print(); } catch(e){} }, 300);
+    }
+
+    // Print current draft cart without completing sale
+    function printDraft() {
+        if(currentCart.length === 0) { showToast('Cart empty', true); return; }
+        const subtotal = currentCart.reduce((s,i)=> s+(i.price*i.qty),0);
+        const tax = taxEnabled ? subtotal * (taxRate/100) : 0;
+        const total = subtotal + tax;
+        const itemsHtml = currentCart.map(i=>`<tr><td>${i.name} (${i.sku})</td><td style="text-align:center;">${i.qty}</td><td style="text-align:right;">₹${i.price.toFixed(2)}</td><td style="text-align:right;">₹${(i.qty*i.price).toFixed(2)}</td></tr>`).join('');
+        const win = window.open('', '_blank', 'width=600,height=700');
+        if(!win) { showToast('Popup blocked. Allow popups to print.', true); return; }
+        const headerHtml = shopInfo && (shopInfo.name || shopInfo.address || shopInfo.phone || shopInfo.logo) ? (`<div style="text-align:center; margin-bottom:8px;">
+            ${shopInfo.logo ? `<img src="${shopInfo.logo}" alt="logo" style="max-height:60px; display:block; margin:0 auto 6px;">` : ''}
+            ${shopInfo.name ? `<div style="font-weight:800; font-size:1.1rem;">${shopInfo.name}</div>` : ''}
+            ${shopInfo.address ? `<div style="font-size:0.85rem; color:#333;">${shopInfo.address}</div>` : ''}
+            ${shopInfo.phone ? `<div style="font-size:0.85rem; color:#333;">Phone: ${shopInfo.phone}</div>` : ''}
+        </div>`) : `<h2 style="text-align:center;">RetailVerse (Draft)</h2>`;
+        const discountLine = (discountType && discountValue) ? `<div style="text-align:right;font-weight:700;">Discount: -₹${( (discountType==='percent') ? (subtotal*(discountValue/100)) : discountValue ).toFixed(2)}</div>` : '';
+        const html = `<!doctype html><html><head><title>Draft Receipt</title><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid #ddd}h2{text-align:center}</style></head><body>${headerHtml}<div>Date: ${new Date().toLocaleString()}</div><table><thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>${discountLine}<div style="margin-top:12px;text-align:right;font-weight:700;">Subtotal: ₹${subtotal.toFixed(2)}</div><div style="text-align:right;font-weight:700;">Tax: ₹${tax.toFixed(2)}</div><div style="text-align:right;font-weight:900;font-size:1.2rem">Total: ₹${total.toFixed(2)}</div></body></html>`;
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        setTimeout(()=>{ try { win.print(); } catch(e){} }, 300);
+    }
+
+    // Hold current bill (save cart for later)
+    function holdCurrentBill(note) {
+        if(currentCart.length === 0) { showToast('Cart empty, nothing to hold', true); return; }
+        const subtotal = currentCart.reduce((s,i)=> s+(i.price*i.qty),0);
+        let discountAmount = 0;
+        if(discountType === 'percent') discountAmount = subtotal * (discountValue/100);
+        else discountAmount = discountValue || 0;
+        if(discountAmount < 0) discountAmount = 0;
+        if(discountAmount > subtotal) discountAmount = subtotal;
+        const taxableBase = Math.max(0, subtotal - discountAmount);
+        const tax = taxEnabled ? taxableBase * (taxRate/100) : 0;
+        const total = taxableBase + tax;
+        const holdId = 'HLD' + Date.now() + Math.floor(Math.random()*1000);
+        const held = { holdId, date: new Date().toLocaleString(), items: currentCart.map(i=>({ sku:i.sku, name:i.name, qty:i.qty, price:i.price })), subtotal, discount: { type: discountType, value: discountValue, amount: discountAmount }, tax, total, note: note || '' };
+        heldBills.unshift(held);
+        persistData();
+        currentCart = [];
+        renderCartUI();
+        renderInventoryTable();
+        showToast(`Bill held (${holdId})`);
+    }
+
+    function renderHeldBillsModal() {
+        const modal = document.getElementById('heldBillsModal'); if(!modal) return;
+        const list = document.getElementById('heldBillsList'); if(!list) return;
+        if(heldBills.length === 0) { list.innerHTML = '<div class="badge">No held bills</div>'; modal.style.display='flex'; return; }
+        let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+        heldBills.forEach(h => {
+            html += `<div style="border:1px solid #eef2f6;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <div style="flex:1;"><div style="font-weight:700">${h.holdId} — ${h.date}</div><div style="font-size:0.95rem;color:#475569">Items: ${h.items.map(it=>`${it.name} x${it.qty}`).join(', ')}</div></div>
+                <div style="text-align:right;min-width:160px;"><div style="font-weight:800">₹${(h.total||0).toFixed(2)}</div><div style="margin-top:6px;display:flex;gap:6px;justify-content:flex-end"><button class="resumeHoldBtn" data-hold="${h.holdId}" style="padding:6px 10px;border-radius:8px;">Resume</button><button class="deleteHoldBtn" data-hold="${h.holdId}" style="padding:6px 10px;border-radius:8px;background:#ef4444;color:white">Delete</button></div></div>
+            </div>`;
+        });
+        html += '</div>';
+        list.innerHTML = html;
+        modal.style.display = 'flex';
+        // wire buttons
+        document.querySelectorAll('.resumeHoldBtn').forEach(b=> b.addEventListener('click', ()=>{ resumeHeldBill(b.dataset.hold); }));
+        document.querySelectorAll('.deleteHoldBtn').forEach(b=> b.addEventListener('click', ()=>{ if(confirm('Delete held bill?')) { deleteHeldBill(b.dataset.hold); } }));
+    }
+
+    function resumeHeldBill(holdId) {
+        const idx = heldBills.findIndex(h => h.holdId === holdId);
+        if(idx === -1) { showToast('Held bill not found', true); return; }
+        const h = heldBills.splice(idx,1)[0];
+        // load into current cart
+        currentCart = h.items.map(i=>({ sku:i.sku, name:i.name, qty:i.qty, price:i.price }));
+        persistData();
+        renderCartUI();
+        const modal = document.getElementById('heldBillsModal'); if(modal) modal.style.display = 'none';
+        showToast(`Resumed ${holdId}`);
+    }
+
+    function deleteHeldBill(holdId) {
+        const idx = heldBills.findIndex(h => h.holdId === holdId);
+        if(idx === -1) return;
+        heldBills.splice(idx,1);
+        persistData();
+        renderHeldBillsModal();
+        showToast('Held bill deleted');
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById("historyTbody");
+        if(!tbody) return;
+        let filtered = [...transactions];
+        const searchTerm = document.getElementById("searchHistoryInput")?.value.toLowerCase() || "";
+        if(searchTerm) {
+            filtered = filtered.filter(t => t.billId.toLowerCase().includes(searchTerm) || t.items.some(it=>it.name.toLowerCase().includes(searchTerm)));
+        }
+        tbody.innerHTML = "";
+        filtered.forEach(t => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = t.billId;
+            row.insertCell(1).innerText = t.date;
+            row.insertCell(2).innerText = t.items.map(i=>`${i.name} x${i.qty}`).join(", ").slice(0,50);
+            row.insertCell(3).innerText = `₹${t.total.toFixed(2)}`;
+            row.insertCell(4).innerText = t.paymentMode;
+            const actions = row.insertCell(5);
+            actions.innerHTML = `
+                <button class="reprintBtn" data-bill="${t.billId}" style="padding:6px 10px; border-radius:8px; margin-right:6px;">Reprint</button>
+                <button class="refundBtn" data-bill="${t.billId}" style="padding:6px 10px; border-radius:8px; margin-right:6px; background:#f97316;">Refund</button>
+                <button class="exchangeBtn" data-bill="${t.billId}" style="padding:6px 10px; border-radius:8px; background:#06b6d4;">Exchange</button>
+            `;
+        });
+        // wire reprint buttons
+        document.querySelectorAll('.reprintBtn').forEach(btn => {
+            btn.addEventListener('click', ()=>{
+                const bill = btn.dataset.bill;
+                const tx = transactions.find(x => x.billId === bill);
+                if(tx) printReceipt(tx);
+                else showToast('Transaction not found', true);
+            });
+        });
+        // wire refund buttons
+        document.querySelectorAll('.refundBtn').forEach(btn => {
+            btn.addEventListener('click', ()=>{
+                const bill = btn.dataset.bill;
+                refundTransaction(bill);
+            });
+        });
+        // wire exchange buttons
+        document.querySelectorAll('.exchangeBtn').forEach(btn => {
+            btn.addEventListener('click', ()=>{
+                const bill = btn.dataset.bill;
+                exchangeTransaction(bill);
+            });
+        });
+    }
+
+    // Analytics using chart & top products
+    function updateAnalytics() {
+        // revenue last 7 days mock (group by day from transactions)
+        const last7 = [];
+        const now = new Date();
+        for(let i=6;i>=0;i--) {
+            let d = new Date(); d.setDate(now.getDate()-i);
+            last7.push(d.toLocaleDateString());
+        }
+        const revenueByDay = last7.map(day => {
+            let sum = 0;
+            transactions.forEach(t => {
+                if(t.date.includes(day)) sum+= t.total;
+            });
+            return sum;
+        });
+        if(revenueChart) revenueChart.destroy();
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        revenueChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: last7, datasets: [{ label: 'Revenue (₹)', data: revenueByDay, borderColor: '#1e3c72', tension: 0.3, fill: false }] }
+        });
+        // top selling: aggregate qty from transactions
+        const productSales = {};
+        transactions.forEach(t => {
+            t.items.forEach(it => { productSales[it.sku] = (productSales[it.sku] || 0) + it.qty; });
+        });
+        const topList = Object.entries(productSales).sort((a,b)=>b[1]-a[1]).slice(0,5);
+        const topListElem = document.getElementById("topProductsList");
+        if(topListElem) {
+            topListElem.innerHTML = topList.map(([sku,qty]) => {
+                const p = products.find(p=>p.sku===sku);
+                return `<li>${p?.name||sku} : ${qty} sold</li>`;
+            }).join("") || "<li>No sales yet</li>";
+        }
+        // small summary in analytics: total revenue
+        const analyticsSummary = document.getElementById('analyticsSummary');
+        if(analyticsSummary) analyticsSummary.innerText = `Total Revenue (all-time): ₹${transactions.reduce((s,t)=> s + (t.total||0),0).toFixed(2)}`;
+    }
+
+    function checkLowStockAlerts() {
+        const lowStockDiv = document.getElementById("lowStockAlertList");
+        if(!lowStockDiv) return;
+        const low = products.filter(p => p.stock <= 5);
+        if(low.length) {
+            lowStockDiv.innerHTML = low.map(p => `<div class="badge" style="background:#fff1f0; margin:5px;">⚠️ ${p.name} (${p.sku}) stock: ${p.stock}</div>`).join("");
+        } else lowStockDiv.innerHTML = "<span>All stocks sufficient ✅</span>";
+    }
+
+    // Refund a transaction (full refund) — restock items and record negative transaction
+    function refundTransaction(billId) {
+        const tx = transactions.find(t => t.billId === billId);
+        if(!tx) { showToast('Transaction not found', true); return; }
+        if(tx.refunded) { showToast('Transaction already refunded', true); return; }
+        if(!confirm(`Refund full amount for ${billId}? This will restock items.`)) return;
+        // restock
+        tx.items.forEach(it => {
+            const prod = products.find(p => p.sku === it.sku);
+            if(prod) prod.stock = (prod.stock || 0) + (it.qty || 0);
+        });
+        // mark original as refunded
+        tx.refunded = true;
+        // create refund transaction
+        const refundId = 'RFN' + Date.now() + Math.floor(Math.random()*1000);
+        const refundTx = {
+            billId: refundId,
+            date: new Date().toLocaleString(),
+            timestamp: Date.now(),
+            items: tx.items.map(i=>({ sku: i.sku, name: i.name, qty: i.qty, price: i.price })),
+            subtotal: tx.subtotal ? -tx.subtotal : -(tx.total || 0),
+            discount: tx.discount ? { ...tx.discount, amount: -(tx.discount.amount||0) } : null,
+            tax: tx.tax ? -tx.tax : 0,
+            total: tx.total ? -tx.total : -(tx.total || 0),
+            paymentMode: tx.paymentMode || 'Refund',
+            note: `Refund for ${billId}`
+        };
+        transactions.unshift(refundTx);
+        persistData();
+        renderInventoryTable();
+        renderHistory();
+        updateAnalytics();
+        showToast(`Refund processed ${refundId}`);
+    }
+
+    // Exchange transaction: open modal-driven flow to select replacements
+    function exchangeTransaction(billId) {
+        openExchangeModal(billId);
+    }
+
+    // Exchange modal flow
+    let exchangeState = { origTx: null, exchangeCart: [] };
+
+    function openExchangeModal(billId) {
+        const tx = transactions.find(t => t.billId === billId);
+        if(!tx) { showToast('Transaction not found', true); return; }
+        if(tx.exchanged) { showToast('Transaction already exchanged', true); return; }
+        exchangeState.origTx = tx;
+        exchangeState.exchangeCart = [];
+        // show modal
+        const em = document.getElementById('exchangeModal');
+        if(!em) { showToast('Exchange modal not found', true); return; }
+        em.style.display = 'flex';
+        // populate original items list and totals
+        const origList = document.getElementById('exchangeOriginalList');
+        const origTotalEl = document.getElementById('exchangeOriginalTotal');
+        if(origList) origList.innerHTML = tx.items.map(i=>`<div>${i.name} (${i.sku}) x${i.qty} - ₹${(i.price*i.qty).toFixed(2)}</div>`).join('');
+        if(origTotalEl) origTotalEl.innerText = `₹${(tx.total||0).toFixed(2)}`;
+        // clear replacement UI
+        const searchInp = document.getElementById('exchangeSearchInput');
+        const sugg = document.getElementById('exchangeSuggestions');
+        if(searchInp) searchInp.value = '';
+        if(sugg) sugg.innerHTML = '';
+        renderExchangeCart();
+    }
+
+    function renderExchangeCart() {
+        const list = document.getElementById('exchangeCartList');
+        const subtotalEl = document.getElementById('exchangeReplacementTotal');
+        if(!list || !subtotalEl) return;
+        if(exchangeState.exchangeCart.length === 0) { list.innerHTML = '<div class="badge">No replacement items</div>'; subtotalEl.innerText = '₹0.00'; return; }
+        let html = `<table style="width:100%"><tr><th>Item</th><th>Qty</th><th style="text-align:right">Total</th><th></th></tr>`;
+        let sub = 0;
+        exchangeState.exchangeCart.forEach((it,idx)=>{
+            html += `<tr><td>${it.name} (${it.sku})</td><td><input type="number" data-idx="${idx}" class="exchangeQty" value="${it.qty}" min="1" style="width:70px"></td><td style="text-align:right">₹${(it.price*it.qty).toFixed(2)}</td><td><button class="removeExchangeItem" data-idx="${idx}" style="background:#ef4444;padding:4px 8px;border-radius:6px;color:white">Remove</button></td></tr>`;
+            sub += it.price*it.qty;
+        });
+        html += `</table>`;
+        list.innerHTML = html;
+        subtotalEl.innerText = `₹${sub.toFixed(2)}`;
+        // wire qty change and remove
+        document.querySelectorAll('.exchangeQty').forEach(inp=>{
+            inp.addEventListener('change', ()=>{
+                const idx = parseInt(inp.dataset.idx); const v = parseInt(inp.value)||1; if(v<1) inp.value=1;
+                exchangeState.exchangeCart[idx].qty = v; renderExchangeCart();
+            });
+        });
+        document.querySelectorAll('.removeExchangeItem').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+                const idx = parseInt(btn.dataset.idx); exchangeState.exchangeCart.splice(idx,1); renderExchangeCart();
+            });
+        });
+    }
+
+    function addReplacementBySku(sku, qty) {
+        const prod = products.find(p=>p.sku===sku);
+        if(!prod) { showToast('Product not found', true); return; }
+        if(prod.stock < qty) { showToast(`Only ${prod.stock} in stock`, true); return; }
+        const existing = exchangeState.exchangeCart.find(i=>i.sku===sku);
+        if(existing) existing.qty += qty; else exchangeState.exchangeCart.push({ sku: prod.sku, name: prod.name, price: prod.price, qty: qty });
+        renderExchangeCart();
+    }
+
+    function applyExchange() {
+        const tx = exchangeState.origTx; if(!tx) return;
+        if(exchangeState.exchangeCart.length===0) { showToast('No replacement items selected', true); return; }
+        // compute totals
+        const origTotal = tx.total || 0;
+        let repSubtotal = exchangeState.exchangeCart.reduce((s,i)=>s+(i.price*i.qty),0);
+        const repTax = taxEnabled ? repSubtotal*(taxRate/100) : 0;
+        const repTotal = repSubtotal + repTax;
+        // restock original items
+        tx.items.forEach(it=>{ const prod = products.find(p=>p.sku===it.sku); if(prod) prod.stock = (prod.stock||0) + (it.qty||0); });
+        // deduct replacement stock
+        for(const it of exchangeState.exchangeCart) {
+            const prod = products.find(p=>p.sku===it.sku);
+            if(prod) {
+                if(prod.stock < it.qty) { showToast(`Insufficient stock for ${prod.name}`, true); return; }
+                prod.stock -= it.qty;
+            }
+        }
+        // mark original
+        tx.exchanged = true;
+        // create exchange transaction
+        const excId = 'EXC'+Date.now()+Math.floor(Math.random()*1000);
+        const newTx = {
+            billId: excId,
+            date: new Date().toLocaleString(),
+            timestamp: Date.now(),
+            items: exchangeState.exchangeCart.map(i=>({ sku:i.sku, name:i.name, qty:i.qty, price:i.price })),
+            subtotal: repSubtotal,
+            discount: null,
+            tax: repTax,
+            total: repTotal,
+            paymentMode: 'Exchange',
+            note: `Exchange for ${tx.billId}`
+        };
+        transactions.unshift(newTx);
+        persistData(); renderInventoryTable(); renderHistory(); updateAnalytics();
+        const diff = +(repTotal - origTotal).toFixed(2);
+        const em = document.getElementById('exchangeModal'); if(em) em.style.display='none';
+        if(diff>0) showToast(`Exchange done. Customer owes ₹${diff}`);
+        else if(diff<0) showToast(`Exchange done. Refund ₹${(-diff).toFixed(2)}`);
+        else showToast('Exchange completed. No due balance.');
+        // offer to print
+        printReceipt(newTx);
+    }
+
+    function cancelExchange() { const em = document.getElementById('exchangeModal'); if(em) em.style.display='none'; exchangeState={ origTx:null, exchangeCart:[] }; }
+
+    // ---------- GMAIL BACKUP SIMULATION (via EmailJS / but for demo we generate data & show download + simulate email draft) ----------
+    // Since actual Gmail API requires OAuth, we implement "backup to Gmail account" via mailto: link with data body
+    // For advanced full experience, we create a comprehensive backup data file and allow user to send via Gmail with prefilled subject.
+    function generateBackupBlob() {
+        const backupData = {
+            timestamp: new Date().toISOString(),
+            products: products,
+            transactions: transactions,
+            shopName: "RetailVerse POS"
+        };
+        return JSON.stringify(backupData, null, 2);
+    }
+
+    function autoBackupToGmail(billId = null) {
+        if(!gmailBackupEmail) return;
+        const backupStr = generateBackupBlob();
+        const subject = `RetailVerse Backup - ${billId ? `Sale ${billId}` : 'Manual Backup'} ${new Date().toLocaleString()}`;
+        const body = `Shop Data Backup:\n\n${backupStr}`;
+        // If EmailJS attachment enabled and configured, try that first
+        if(emailJsConfig && emailJsConfig.enabled && emailJsConfig.serviceId && emailJsConfig.templateId && emailJsConfig.userId) {
+            sendBackupWithEmailJS(backupStr, subject, gmailBackupEmail).then(() => {
+                showToast('Backup sent via EmailJS');
+            }).catch(err => {
+                console.error(err);
+                // fallback to mailto
+                const mailtoLink = `mailto:${gmailBackupEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                try { window.open(mailtoLink, '_blank'); showToast(`Backup draft opened in Gmail (${gmailBackupEmail})`); }
+                catch(e) { downloadBackupBlob(backupStr); }
+            });
+            return;
+        }
+        const mailtoLink = `mailto:${gmailBackupEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        try {
+            window.open(mailtoLink, '_blank');
+            showToast(`Backup draft opened in Gmail (${gmailBackupEmail})`);
+        } catch(e) {
+            downloadBackupBlob(backupStr);
+        }
+    }
+
+    function manualBackup() {
+        const backupStr = generateBackupBlob();
+        // If EmailJS configured, use it
+        if(emailJsConfig && emailJsConfig.enabled && emailJsConfig.serviceId && emailJsConfig.templateId && emailJsConfig.userId) {
+            sendBackupWithEmailJS(backupStr, `RetailVerse Manual Backup ${new Date().toLocaleString()}`, gmailBackupEmail)
+                .then(()=> showToast('Backup sent via EmailJS'))
+                .catch(err=> { console.error(err); showToast('EmailJS send failed', true); downloadBackupBlob(backupStr); });
+            return;
+        }
+        if(!gmailBackupEmail) { downloadBackupBlob(backupStr); return; }
+        autoBackupToGmail();
+    }
+
+    function downloadBackupBlob(backupStr) {
+        try {
+            const blob = new Blob([backupStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `retail_backup_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('Backup downloaded');
+        } catch(e) { showToast('Failed to download backup', true); }
+    }
+
+    // Send backup using EmailJS as attachment (best-effort). Requires user to configure EmailJS in Settings.
+    function sendBackupWithEmailJS(backupStr, subject, toEmail) {
+        return new Promise((resolve, reject)=>{
+            if(!emailJsConfig || !emailJsConfig.enabled) return reject(new Error('EmailJS not enabled'));
+            const serviceId = emailJsConfig.serviceId;
+            const templateId = emailJsConfig.templateId;
+            const userId = emailJsConfig.userId;
+            const payload = {
+                to_email: toEmail || gmailBackupEmail || '',
+                subject: subject,
+                message: 'Backup file attached',
+                // attachments: we pass as array of data URIs in template params if supported
+                backup_file: `data:application/json;base64,${btoa(unescape(encodeURIComponent(backupStr)))}`
+            };
+            const loadAndSend = ()=>{
+                try {
+                    if(!window.emailjs) return reject(new Error('EmailJS SDK not loaded'));
+                    try { emailjs.init(userId); } catch(e) { /* ignore init errors */ }
+                    emailjs.send(serviceId, templateId, payload)
+                        .then(()=> resolve())
+                        .catch(err=> reject(err));
+                } catch(err) { reject(err); }
+            };
+            // load SDK if needed
+            if(!window.emailjs) {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js';
+                s.onload = ()=> loadAndSend();
+                s.onerror = (e)=> reject(e);
+                document.head.appendChild(s);
+            } else loadAndSend();
+        });
+    }
+
+    // Generate sales report for a date range. If render=true show in modal, if download=true trigger CSV download.
+    function generateSalesReport(startDateStr, endDateStr, render=true, download=false) {
+        const startDate = startDateStr ? new Date(startDateStr + 'T00:00:00') : new Date(0);
+        const endDate = endDateStr ? new Date(endDateStr + 'T23:59:59') : new Date();
+        const rows = [];
+        let totalSales = 0, totalRefunds = 0, countSales = 0;
+        transactions.forEach(t => {
+            const ts = t.timestamp ? t.timestamp : Date.parse(t.date);
+            if(isNaN(ts)) return;
+            const d = new Date(ts);
+            if(d < startDate || d > endDate) return;
+            const items = (t.items||[]).map(i=>`${i.name} x${i.qty}`).join('; ');
+            rows.push({ billId: t.billId, date: t.date, total: t.total||0, payment: t.paymentMode||'', items: items });
+            if(t.total && t.total>0) { totalSales += t.total; countSales++; }
+            if(t.total && t.total<0) totalRefunds += t.total;
+        });
+        const net = totalSales + totalRefunds;
+        if(render) {
+            const sumEl = document.getElementById('reportSummary');
+            const tableEl = document.getElementById('reportTable');
+            if(sumEl) sumEl.innerHTML = `<div><strong>From:</strong> ${startDate.toLocaleDateString()} <strong>To:</strong> ${endDate.toLocaleDateString()}</div><div><strong>Sales:</strong> ${countSales} | <strong>Total Sales:</strong> ₹${totalSales.toFixed(2)} | <strong>Refunds:</strong> ₹${totalRefunds.toFixed(2)} | <strong>Net:</strong> ₹${net.toFixed(2)}</div>`;
+            if(tableEl) {
+                if(rows.length===0) tableEl.innerHTML = '<div class="badge">No transactions in range</div>';
+                else {
+                    let html = `<table style="width:100%; border-collapse:collapse;"><thead><tr><th>Bill</th><th>Date</th><th>Items</th><th style="text-align:right">Total</th><th>Payment</th></tr></thead><tbody>`;
+                    rows.forEach(r => { html += `<tr><td>${r.billId}</td><td>${r.date}</td><td>${r.items}</td><td style="text-align:right">₹${(r.total||0).toFixed(2)}</td><td>${r.payment}</td></tr>`; });
+                    html += '</tbody></table>';
+                    tableEl.innerHTML = html;
+                }
+            }
+        }
+        if(download) {
+            // build CSV
+            let csv = 'Bill ID,Date,Items,Total,Payment\n';
+            rows.forEach(r => {
+                const safeItems = `"${(r.items||'').replace(/"/g,'""')}"`;
+                csv += `${r.billId},"${r.date}",${safeItems},${(r.total||0).toFixed(2)},${r.payment}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `sales_report_${startDateStr||'all'}_to_${endDateStr||'now'}.csv`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+            showToast('Report downloaded');
+        }
+    }
+
+    function configureGmail() {
+        let email = prompt("Enter your Gmail address for backups:", gmailBackupEmail || "");
+        if(email && email.includes("@") && email.includes(".")) {
+            gmailBackupEmail = email;
+            localStorage.setItem("retail_gmail_backup", gmailBackupEmail);
+            persistData();
+            updateBackupUI();
+            showToast(`Gmail account linked: ${email}`);
+        } else if(email) alert("Invalid email format");
+    }
+
+    function showToast(msg, isError=false) {
+        const toast = document.getElementById("toastMsg");
+        toast.innerText = msg;
+        toast.style.background = isError ? "#b91c1c" : "#1f2937";
+        toast.style.opacity = "1";
+        toast.style.visibility = "visible";
+        setTimeout(()=> { toast.style.opacity = "0"; toast.style.visibility = "hidden"; }, 3000);
+    }
+
+    // Initialize tax UI elements and wire events
+    function initializeTaxUI() {
+        const slider = document.getElementById('taxRateSlider');
+        const rateVal = document.getElementById('taxRateValue');
+        const checkbox = document.getElementById('taxEnabledCheckbox');
+        // apply loaded settings to UI
+        if(slider) slider.value = taxRate;
+        if(rateVal) rateVal.innerText = taxRate;
+        if(checkbox) checkbox.checked = !!taxEnabled;
+
+        // discount UI
+        const discType = document.getElementById('discountType');
+        const discVal = document.getElementById('discountValueInput');
+        if(discType) discType.value = discountType;
+        if(discVal) discVal.value = discountValue;
+
+        if(slider) {
+            slider.addEventListener('input', (e)=>{
+                taxRate = parseFloat(e.target.value) || 0;
+                if(rateVal) rateVal.innerText = taxRate;
+                persistData();
+                updateCartTotals();
+            });
+        }
+        if(checkbox) {
+            checkbox.addEventListener('change', (e)=>{
+                taxEnabled = !!e.target.checked;
+                persistData();
+                updateCartTotals();
+            });
+        }
+        if(discType) {
+            discType.addEventListener('change', (e)=>{
+                discountType = e.target.value;
+                persistData();
+                updateCartTotals();
+            });
+        }
+        if(discVal) {
+            discVal.addEventListener('change', (e)=>{
+                discountValue = parseFloat(e.target.value) || 0;
+                persistData();
+                updateCartTotals();
+            });
+        }
+    }
+
+    // Initialize settings modal and wire save/open actions
+    function initializeSettingsUI() {
+        const openBtn = document.getElementById('openSettingsBtn');
+        const modal = document.getElementById('settingsModal');
+        const closeBtn = document.getElementById('closeSettingsBtn');
+        const saveBtn = document.getElementById('saveSettingsBtn');
+        const nameInp = document.getElementById('shopNameInput');
+        const addrInp = document.getElementById('shopAddressInput');
+        const phoneInp = document.getElementById('shopPhoneInput');
+        const logoInp = document.getElementById('shopLogoInput');
+        const emailJsEnabled = document.getElementById('emailJsEnabled');
+        const emailJsService = document.getElementById('emailJsService');
+        const emailJsTemplate = document.getElementById('emailJsTemplate');
+        const emailJsUser = document.getElementById('emailJsUser');
+
+        if(nameInp) nameInp.value = shopInfo.name || '';
+        if(addrInp) addrInp.value = shopInfo.address || '';
+        if(phoneInp) phoneInp.value = shopInfo.phone || '';
+        if(logoInp) logoInp.value = shopInfo.logo || '';
+        if(emailJsEnabled) emailJsEnabled.checked = !!emailJsConfig.enabled;
+        if(emailJsService) emailJsService.value = emailJsConfig.serviceId || '';
+        if(emailJsTemplate) emailJsTemplate.value = emailJsConfig.templateId || '';
+        if(emailJsUser) emailJsUser.value = emailJsConfig.userId || '';
+
+        openBtn?.addEventListener('click', ()=>{
+            if(modal) modal.style.display = 'flex';
+            if(nameInp) nameInp.value = shopInfo.name || '';
+            if(addrInp) addrInp.value = shopInfo.address || '';
+            if(phoneInp) phoneInp.value = shopInfo.phone || '';
+            if(logoInp) logoInp.value = shopInfo.logo || '';
+        });
+        closeBtn?.addEventListener('click', ()=>{ if(modal) modal.style.display = 'none'; });
+        saveBtn?.addEventListener('click', ()=>{
+            shopInfo.name = nameInp?.value || '';
+            shopInfo.address = addrInp?.value || '';
+            shopInfo.phone = phoneInp?.value || '';
+            shopInfo.logo = logoInp?.value || '';
+            // save EmailJS config
+            if(emailJsEnabled) emailJsConfig.enabled = !!emailJsEnabled.checked;
+            if(emailJsService) emailJsConfig.serviceId = emailJsService.value || '';
+            if(emailJsTemplate) emailJsConfig.templateId = emailJsTemplate.value || '';
+            if(emailJsUser) emailJsConfig.userId = emailJsUser.value || '';
+            persistData();
+            if(modal) modal.style.display = 'none';
+            showToast('Settings saved');
+        });
+    }
+
+    // product search suggestions + add to cart
+    const searchInput = document.getElementById("productSearchInput");
+    const suggestionsDiv = document.getElementById("searchSuggestions");
+    if(searchInput) {
+        searchInput.addEventListener("input", () => {
+            const term = searchInput.value.toLowerCase();
+            if(!term) { suggestionsDiv.innerHTML = ""; return; }
+            const matches = products.filter(p => (p.sku && p.sku.toLowerCase().includes(term)) || (p.name && p.name.toLowerCase().includes(term)) || (p.barcode && p.barcode.toLowerCase().includes(term)) );
+                suggestionsDiv.innerHTML = matches.map(p => `<div style="padding:8px; border-bottom:1px solid #eee; cursor:pointer; display:flex; align-items:center; gap:8px;" data-sku="${p.sku}">` +
+                `<img src="${p.image||''}" onerror="this.style.display='none'" style="height:28px;width:28px;object-fit:cover;border-radius:6px;">` +
+                `<div style="flex:1;">${p.name} (${p.sku}) ${p.barcode? '| barcode:'+p.barcode : ''}<div style="font-size:0.85rem;color:#475569">₹${p.price} | stock:${p.stock}</div></div>` +
+                `</div>`).join("");
+            document.querySelectorAll("[data-sku]").forEach(el => {
+                el.addEventListener("click", () => {
+                    const sku = el.dataset.sku;
+                    const qty = parseInt(document.getElementById("billQty").value) || 1;
+                    addToCart(sku, qty);
+                    searchInput.value = "";
+                    suggestionsDiv.innerHTML = "";
+                });
+            });
+        });
+    }
+
+    document.getElementById("addToCartBtn")?.addEventListener("click",()=>{
+        const sku = document.getElementById("productSearchInput").value.trim();
+        if(!sku) { showToast("Enter SKU, barcode or select product", true); return; }
+        const prod = products.find(p=>p.sku===sku || (p.name && p.name.toLowerCase()===sku.toLowerCase()) || (p.barcode && p.barcode===sku));
+        if(!prod) { showToast("Product not found", true); return; }
+        const qty = parseInt(document.getElementById("billQty").value)||1;
+        addToCart(prod.sku, qty);
+        document.getElementById("productSearchInput").value = "";
+    });
+    document.getElementById("completeSaleBtn")?.addEventListener("click",()=>{
+        const mode = document.getElementById("paymentMode").value;
+        completeSale(mode);
+    });
+    document.getElementById("configureGmailBtn")?.addEventListener("click",configureGmail);
+    document.getElementById("manualBackupBtn")?.addEventListener("click",manualBackup);
+    document.getElementById("showAddProductModalBtn")?.addEventListener("click",()=>{
+        document.getElementById("productModal").style.display = "flex";
+    });
+    document.getElementById("closeModalBtn")?.addEventListener("click",()=>{
+        document.getElementById("productModal").style.display = "none";
+    });
+    document.getElementById("confirmAddProduct")?.addEventListener("click",()=>{
+        const sku = document.getElementById("newSku").value.trim();
+        const barcode = document.getElementById("newBarcode") ? document.getElementById("newBarcode").value.trim() : '';
+        const image = document.getElementById("newImage") ? document.getElementById("newImage").value.trim() : '';
+        const name = document.getElementById("newName").value.trim();
+        const cost = parseFloat(document.getElementById("newCost").value);
+        const mrp = parseFloat(document.getElementById("newMrp").value);
+        const price = parseFloat(document.getElementById("newPrice").value);
+        const stock = parseInt(document.getElementById("newStock").value);
+        if(!sku || !name || isNaN(price) || isNaN(stock) || isNaN(cost) || isNaN(mrp)) { alert("Fill all fields"); return; }
+        if(products.find(p=>p.sku===sku)) { alert("SKU exists"); return; }
+        products.push({ sku, barcode: barcode || '', image: image || '', name, cost, mrp, price, stock });
+        persistData();
+        renderInventoryTable();
+        document.getElementById("productModal").style.display = "none";
+        showToast("Product added");
+        document.getElementById("newSku").value=""; if(document.getElementById("newBarcode")) document.getElementById("newBarcode").value=''; if(document.getElementById("newImage")) document.getElementById("newImage").value=''; document.getElementById("newName").value=""; document.getElementById("newCost").value=""; document.getElementById("newMrp").value=""; document.getElementById("newPrice").value=""; document.getElementById("newStock").value="";
+    });
+    document.getElementById("searchHistoryInput")?.addEventListener("input",()=>renderHistory());
+
+    // print draft button
+    document.getElementById('printDraftBtn')?.addEventListener('click', ()=> printDraft());
+    document.getElementById('holdBillBtn')?.addEventListener('click', ()=> { const note = prompt('Optional note for held bill (customer name etc.)',''); holdCurrentBill(note); });
+    document.getElementById('openHeldBillsBtn')?.addEventListener('click', ()=> renderHeldBillsModal());
+    document.getElementById('closeHeldBillsBtn')?.addEventListener('click', ()=>{ const m = document.getElementById('heldBillsModal'); if(m) m.style.display='none'; });
+    // Sales Report modal wiring
+    document.getElementById('openReportBtn')?.addEventListener('click', ()=>{
+        const modal = document.getElementById('reportModal');
+        if(!modal) return;
+        // set default dates (last 7 days)
+        const end = new Date(); const start = new Date(); start.setDate(end.getDate()-6);
+        document.getElementById('reportStart').value = start.toISOString().slice(0,10);
+        document.getElementById('reportEnd').value = end.toISOString().slice(0,10);
+        document.getElementById('reportSummary').innerHTML = '';
+        document.getElementById('reportTable').innerHTML = '';
+        modal.style.display = 'flex';
+    });
+    document.getElementById('closeReportBtn')?.addEventListener('click', ()=>{ const m=document.getElementById('reportModal'); if(m) m.style.display='none'; });
+    document.getElementById('generateReportBtn')?.addEventListener('click', ()=>{
+        const s = document.getElementById('reportStart').value; const e = document.getElementById('reportEnd').value; generateSalesReport(s,e,true);
+    });
+    document.getElementById('downloadReportBtn')?.addEventListener('click', ()=>{
+        const s = document.getElementById('reportStart').value; const e = document.getElementById('reportEnd').value; generateSalesReport(s,e,false,true);
+    });
+    // Exchange modal listeners: search & apply/cancel
+    document.getElementById('exchangeSearchInput')?.addEventListener('input', (e)=>{
+        const term = e.target.value.trim().toLowerCase();
+        const sug = document.getElementById('exchangeSuggestions'); if(!sug) return;
+        if(!term) { sug.innerHTML=''; return; }
+        const matches = products.filter(p=> (p.sku && p.sku.toLowerCase().includes(term)) || (p.name && p.name.toLowerCase().includes(term)) || (p.barcode && p.barcode.toLowerCase().includes(term)) );
+        sug.innerHTML = matches.map(p=>`<div class=\"exchangeSuggestion\" data-sku=\"${p.sku}\" style=\"padding:8px;border-bottom:1px solid #eee;cursor:pointer;\">${p.name} (${p.sku}) ${p.barcode? '| barcode:'+p.barcode : ''} - ₹${p.price} | stock:${p.stock}</div>`).join('');
+        document.querySelectorAll('.exchangeSuggestion').forEach(el=> el.addEventListener('click', ()=>{
+            const sku = el.dataset.sku; addReplacementBySku(sku, 1); el.parentElement.innerHTML=''; document.getElementById('exchangeSearchInput').value='';
+        }));
+    });
+    document.getElementById('applyExchangeBtn')?.addEventListener('click', ()=> applyExchange());
+    document.getElementById('cancelExchangeBtn')?.addEventListener('click', ()=> cancelExchange());
+
+    // Tab switching
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click",()=>{
+            document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+            const tabId = btn.dataset.tab;
+            document.querySelectorAll(".tab-pane").forEach(pane=>pane.classList.remove("active-pane"));
+            document.getElementById(`${tabId}Pane`).classList.add("active-pane");
+            if(tabId === "analytics") updateAnalytics();
+            if(tabId === "history") renderHistory();
+            if(tabId === "inventory") renderInventoryTable();
+        });
+    });
+
+    loadData();
+    renderInventoryTable();
+    renderCartUI();
+    renderHistory();
+    updateAnalytics();
+    checkLowStockAlerts();
+
+    // Fallback delegated handlers: ensure critical header buttons work even if direct listeners failed
+    document.addEventListener('click', (e)=>{
+        const openBtn = e.target.closest ? e.target.closest('#openSettingsBtn') : null;
+        const cfgBtn = e.target.closest ? e.target.closest('#configureGmailBtn') : null;
+        const backupBtn = e.target.closest ? e.target.closest('#manualBackupBtn') : null;
+        const exitBtn = e.target.closest ? e.target.closest('#exitAppBtn') : null;
+        if(openBtn) {
+            const modal = document.getElementById('settingsModal');
+            if(modal) modal.style.display = 'flex';
+            // ensure inputs are populated
+            const nameInp = document.getElementById('shopNameInput');
+            const addrInp = document.getElementById('shopAddressInput');
+            const phoneInp = document.getElementById('shopPhoneInput');
+            const logoInp = document.getElementById('shopLogoInput');
+            if(nameInp) nameInp.value = shopInfo.name || '';
+            if(addrInp) addrInp.value = shopInfo.address || '';
+            if(phoneInp) phoneInp.value = shopInfo.phone || '';
+            if(logoInp) logoInp.value = shopInfo.logo || '';
+        }
+        if(cfgBtn) configureGmail();
+        if(backupBtn) manualBackup();
+        if(exitBtn) {
+            const em = document.getElementById('exitConfirmModal');
+            if(em) em.style.display = 'flex';
+        }
+    });
+
+    // close settings modal when clicking outside content
+    document.getElementById('settingsModal')?.addEventListener('click', (e)=>{
+        const modalContent = e.target.closest('div[style*="max-width:520px"]');
+        if(!modalContent) { document.getElementById('settingsModal').style.display = 'none'; }
+    });
+
+    // Exit app handler (attempt to close window; fall back to about:blank and instruction)
+    function exitApp() {
+        try {
+            // Best-effort close
+            window.close();
+            // Some browsers block close if not opened by script; try replacing self then close
+            try { window.open('','_self'); window.close(); } catch(e) {}
+            // After a short delay, if still open, navigate to blank and show toast
+            setTimeout(()=>{
+                showToast('If the window did not close, please close the tab or window manually.', true);
+                try { window.location.href = 'about:blank'; } catch(e) {}
+            }, 400);
+        } catch(e) {
+            showToast('Unable to close window programmatically. Please close tab manually.', true);
+        }
+    }
+    // Exit confirm modal wiring
+    document.getElementById('confirmExitBtn')?.addEventListener('click', ()=>{
+        const em = document.getElementById('exitConfirmModal'); if(em) em.style.display='none';
+        exitApp();
+    });
+    document.getElementById('cancelExitBtn')?.addEventListener('click', ()=>{
+        const em = document.getElementById('exitConfirmModal'); if(em) em.style.display='none';
+    });
+    document.getElementById('exitConfirmModal')?.addEventListener('click', (e)=>{
+        const modalContent = e.target.closest('div[style*="max-width:380px"]');
+        if(!modalContent) { const em = document.getElementById('exitConfirmModal'); if(em) em.style.display='none'; }
+    });
+</script>
+</body>
+</html>
