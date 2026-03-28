@@ -1,26 +1,12 @@
 * {
-    scroll-behavior: smooth;
 }
 
-@keyframes bgGradient {
-    0% {
-        background-position: 0% 50%;
-    }
 
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
 
 body {
     background: linear-gradient(-45deg, #e0eafc, #cfdef3, #eef2f3, #e0eafc) !important;
     background-size: 400% 400% !important;
-    animation: bgGradient 15s ease infinite;
-    min-height: 100vh;
+min-height: 100vh;
 }
 
 .header {
@@ -28,39 +14,18 @@ body {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
-    animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
 .logo-area h1 {
     font-size: 1.8rem !important;
     font-weight: 800 !important;
-    animation: glowTitle 3s ease-in-out infinite alternate;
 }
 
-@keyframes glowTitle {
-    from {
-        text-shadow: 0 0 10px rgba(30, 60, 114, 0.1);
-    }
 
-    to {
-        text-shadow: 0 0 20px rgba(42, 82, 152, 0.3);
-    }
-}
 
 .tabs {
-    animation: slideDown 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tab-btn {
@@ -68,11 +33,9 @@ body {
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.8) !important;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03) !important;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .tab-btn i {
-    transition: transform 0.3s ease;
 }
 
 .tab-btn:hover {
@@ -94,20 +57,9 @@ body {
 }
 
 .tab-pane.active-pane {
-    animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.98) translateY(10px);
-    }
 
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
 
 .card {
     background: rgba(255, 255, 255, 0.75) !important;
@@ -115,7 +67,6 @@ body {
     -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04), 0 2px 10px rgba(0, 0, 0, 0.02) !important;
     border: 1px solid rgba(255, 255, 255, 0.6) !important;
-    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
 }
 
 .card:hover {
@@ -127,7 +78,6 @@ input,
 select {
     border: 2px solid rgba(226, 232, 240, 0.8) !important;
     background: rgba(255, 255, 255, 0.8) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 input:focus,
@@ -141,8 +91,7 @@ select:focus {
 button {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     box-shadow: 0 4px 12px rgba(30, 60, 114, 0.2) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    position: relative;
+position: relative;
     overflow: hidden;
 }
 
@@ -166,7 +115,6 @@ button.secondary:hover {
 }
 
 tr {
-    transition: all 0.3s ease;
 }
 
 tr:hover td {
@@ -195,15 +143,13 @@ td:last-child {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent !important;
-    animation: glowTitle 3s ease-in-out infinite alternate;
 }
 
 .toast-msg {
     background: rgba(30, 41, 59, 0.95) !important;
     backdrop-filter: blur(8px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    transform: translateY(20px) scale(0.9) !important;
+transform: translateY(20px) scale(0.9) !important;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -219,36 +165,16 @@ div[id$="Modal"]>div {
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
     border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    animation: modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-@keyframes modalPop {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
-    }
 
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
 
 div[id$="Modal"] {
     background: rgba(15, 23, 42, 0.4) !important;
     backdrop-filter: blur(4px);
-    animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
 
-    to {
-        opacity: 1;
-    }
-}
 
 /* Responsive Mobile & Tablet Design */
 @media (max-width: 900px) {

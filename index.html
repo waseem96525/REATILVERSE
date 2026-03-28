@@ -85,8 +85,7 @@
             font-weight: 600;
             font-size: 0.8rem;
             cursor: pointer;
-            transition: 0.2s;
-            display: flex;
+display: flex;
             gap: 8px;
             align-items: center;
         }
@@ -116,8 +115,7 @@
             align-items: center;
             gap: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-            color: #334155;
+color: #334155;
         }
 
         .tab-btn i {
@@ -132,17 +130,13 @@
 
         .tab-pane {
             display: none;
-            animation: fade 0.25s ease;
-        }
+}
 
         .tab-pane.active-pane {
             display: block;
         }
 
-        @keyframes fade {
-            from { opacity: 0; transform: translateY(5px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
+        
 
         /* Cards and grids */
         .card {
@@ -186,8 +180,7 @@
             border-radius: 18px;
             border: 1.5px solid #e2e8f0;
             background: #fefefe;
-            transition: 0.2s;
-            font-size: 0.9rem;
+font-size: 0.9rem;
         }
 
         input:focus, select:focus {
@@ -203,8 +196,7 @@
             border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
-        }
+}
 
         button.secondary {
             background: #eef2ff;
@@ -247,8 +239,7 @@
             z-index: 1000;
             font-size: 0.9rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: opacity 0.3s;
-        }
+}
 
         .danger-btn {
             background: #b91c1c;
@@ -262,10 +253,166 @@
                 grid-column: span 1;
             }
         }
+
+        /* ── LOGIN OVERLAY ── */
+        #loginOverlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3c72 55%, #2a5298 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.45s ease;
+        }
+        #loginOverlay.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 32px;
+            padding: 48px 44px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.45);
+            text-align: center;
+            animation: loginPop 0.4s cubic-bezier(.22,1,.36,1);
+        }
+        @keyframes loginPop {
+            from { transform: translateY(30px) scale(0.96); opacity: 0; }
+            to   { transform: translateY(0)    scale(1);    opacity: 1; }
+        }
+        .login-card .login-logo {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+        .login-card .login-logo i {
+            color: #60a5fa;
+        }
+        .login-card .login-sub {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.85rem;
+            margin-bottom: 36px;
+        }
+        .login-field {
+            position: relative;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .login-field label {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+        .login-field input {
+            width: 100%;
+            padding: 13px 16px 13px 44px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .login-field input::placeholder { color: rgba(255,255,255,0.35); }
+        .login-field input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96,165,250,0.2);
+            outline: none;
+            background: rgba(255,255,255,0.12);
+        }
+        .login-field .field-icon {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            color: rgba(255,255,255,0.45);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        .login-field .toggle-pw {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            color: rgba(255,255,255,0.45);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        #loginBtn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        #loginBtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 28px rgba(37,99,235,0.5);
+        }
+        #loginBtn:active { transform: scale(0.98); }
+        #loginError {
+            color: #fca5a5;
+            font-size: 0.85rem;
+            margin-top: 14px;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .login-hint {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.78rem;
+            margin-top: 28px;
+        }
+        /* lock button in header */
+        #lockAppBtn {
+            background: #334155;
+        }
+        #lockAppBtn:hover { background: #1e293b; }
     </style>
     <link rel="stylesheet" href="modern.css">
 </head>
 <body>
+
+<!-- ════════════ LOGIN OVERLAY ════════════ -->
+<div id="loginOverlay">
+    <div class="login-card">
+        <div class="login-logo"><i class="fas fa-store"></i> RetailVerse</div>
+        <div class="login-sub">Advanced POS &amp; Inventory System</div>
+        <div class="login-field">
+            <label for="loginUsername">Username</label>
+            <i class="fas fa-user field-icon"></i>
+            <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="username">
+        </div>
+        <div class="login-field">
+            <label for="loginPassword">Password / PIN</label>
+            <i class="fas fa-lock field-icon"></i>
+            <input type="password" id="loginPassword" placeholder="Enter password or PIN" autocomplete="current-password">
+            <i class="fas fa-eye toggle-pw" id="toggleLoginPw"></i>
+        </div>
+        <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> &nbsp;Sign In</button>
+        <div id="loginError"></div>
+        <div class="login-hint">Default: <strong style="color:rgba(255,255,255,0.5)">admin</strong> / <strong style="color:rgba(255,255,255,0.5)">1234</strong></div>
+    </div>
+</div>
 <div class="app-container">
     <div class="header">
         <div class="logo-area">
@@ -302,6 +449,7 @@
             <button id="manualBackupBtn" class="btn-backup"><i class="fas fa-database"></i> Backup Now</button>
             <button id="openHeldBillsBtn" class="btn-backup"><i class="fas fa-pause-circle"></i> Held Bills</button>
             <button id="openSettingsBtn" class="btn-backup" style="background:#0f172a;"><i class="fas fa-cog"></i> Settings</button>
+            <button id="lockAppBtn" class="btn-backup"><i class="fas fa-lock"></i> Lock</button>
             <button id="exitAppBtn" class="btn-backup" style="background:#b91c1c;"><i class="fas fa-sign-out-alt"></i> Exit</button>
         </div>
     </div>
@@ -469,6 +617,12 @@
                         <input id="emailJsTemplate" placeholder="EmailJS Template ID" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
                         <input id="emailJsUser" placeholder="EmailJS User ID" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
                     </div>
+                    <div style="margin-top:10px; border-top:1px dashed #e6eef8; padding-top:10px;">
+                        <h4 style="margin-bottom:6px;"><i class="fas fa-shield-alt" style="color:#1e3c72;"></i> Change Login Credentials</h4>
+                        <input id="newLoginUsername" placeholder="New Username" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
+                        <input id="newLoginPassword" type="password" placeholder="New Password / PIN" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
+                        <input id="newLoginPasswordConfirm" type="password" placeholder="Confirm New Password / PIN" style="width:100%; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+                    </div>
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
                     <button id="saveSettingsBtn">Save</button>
                     <button id="closeSettingsBtn" class="secondary">Cancel</button>
@@ -529,6 +683,112 @@
 
 <script>
     let pendingUploadTarget = null;
+
+    // ═══════════════ AUTH / LOGIN ═══════════════
+    const AUTH_KEY = 'retailverse_auth';
+    const SESSION_KEY = 'retailverse_session';
+    // Simple hash (djb2, good enough for local PIN protection)
+    function hashStr(str) {
+        let h = 5381;
+        for(let i=0; i<str.length; i++) h = ((h<<5)+h) ^ str.charCodeAt(i);
+        return (h >>> 0).toString(36);
+    }
+    function getCredentials() {
+        try {
+            const raw = localStorage.getItem(AUTH_KEY);
+            if(raw) return JSON.parse(raw);
+        } catch(e){}
+        return { username: 'admin', passwordHash: hashStr('1234') };
+    }
+    function saveCredentials(username, password) {
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ username: username.trim(), passwordHash: hashStr(password) }));
+    }
+    function isLoggedIn() {
+        return sessionStorage.getItem(SESSION_KEY) === 'true';
+    }
+    function setLoggedIn(val) {
+        if(val) sessionStorage.setItem(SESSION_KEY, 'true');
+        else sessionStorage.removeItem(SESSION_KEY);
+    }
+    function attemptLogin(username, password) {
+        const creds = getCredentials();
+        return username.trim() === creds.username && hashStr(password) === creds.passwordHash;
+    }
+    function showLoginOverlay() {
+        const overlay = document.getElementById('loginOverlay');
+        if(overlay) {
+            overlay.classList.remove('hide');
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').innerHTML = '';
+            setTimeout(()=>document.getElementById('loginUsername').focus(), 200);
+        }
+    }
+    function hideLoginOverlay() {
+        const overlay = document.getElementById('loginOverlay');
+        if(overlay) {
+            overlay.classList.add('hide');
+            setTimeout(()=>{ overlay.style.display='none'; }, 450);
+        }
+    }
+    // Wire login button
+    document.getElementById('loginBtn')?.addEventListener('click', doLogin);
+    document.getElementById('loginPassword')?.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+    document.getElementById('loginUsername')?.addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('loginPassword').focus(); });
+    // Toggle password visibility
+    document.getElementById('toggleLoginPw')?.addEventListener('click', function() {
+        const inp = document.getElementById('loginPassword');
+        const isHidden = inp.type === 'password';
+        inp.type = isHidden ? 'text' : 'password';
+        this.className = isHidden ? 'fas fa-eye-slash toggle-pw' : 'fas fa-eye toggle-pw';
+    });
+    function doLogin() {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        const errEl = document.getElementById('loginError');
+        if(!username || !password) {
+            errEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please enter username and password.';
+            return;
+        }
+        if(attemptLogin(username, password)) {
+            setLoggedIn(true);
+            hideLoginOverlay();
+            errEl.innerHTML = '';
+        } else {
+            errEl.innerHTML = '<i class="fas fa-times-circle"></i> Invalid username or password.';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginPassword').focus();
+            // Shake animation
+            const card = document.querySelector('.login-card');
+            card.style.animation = 'none';
+            card.offsetHeight; // reflow
+            card.style.animation = 'shake 0.4s ease';
+        }
+    }
+    // Lock button
+    document.getElementById('lockAppBtn')?.addEventListener('click', ()=>{
+        setLoggedIn(false);
+        showLoginOverlay();
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('loginOverlay').classList.remove('hide');
+    });
+    // Check session on load — hide overlay only if already logged in
+    if(isLoggedIn()) {
+        document.getElementById('loginOverlay').style.display = 'none';
+    }
+    // Add shake keyframes dynamically
+    (function(){
+        const s = document.createElement('style');
+        s.textContent = `@keyframes shake {
+            0%,100%{transform:translateX(0)}
+            20%{transform:translateX(-10px)}
+            40%{transform:translateX(10px)}
+            60%{transform:translateX(-8px)}
+            80%{transform:translateX(8px)}
+        }`;
+        document.head.appendChild(s);
+    })();
+    // ═══════════════════════════════════════════
+
     // ---------- DATA MODELS ----------
     let products = [  // initial inventory (cost, mrp, price = selling price, barcode)
         { sku: "P1001", barcode: "BC1001001", image: "", name: "Premium Notebook", cost: 70, mrp: 150, price: 120, stock: 34 },
@@ -562,35 +822,60 @@
         }
     }
 
-    // Save to localStorage (full state)
-    function persistData() {
-        const state = { products, transactions, gmailBackupEmail, taxRate, taxEnabled, shopInfo, discountType, discountValue, emailJsConfig, heldBills };
-        localStorage.setItem("retail_suite_data", JSON.stringify(state));
+    // Save to IndexedDB (full state)
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open("RetailVerseDB", 1);
+            request.onerror = () => reject(request.error);
+            request.onupgradeneeded = e => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains("appData")) {
+                    db.createObjectStore("appData", { keyPath: "id" });
+                }
+            };
+            request.onsuccess = e => resolve(e.target.result);
+        });
     }
 
-    function loadData() {
-        const saved = localStorage.getItem("retail_suite_data");
-        if(saved) {
-            try {
-                const data = JSON.parse(saved);
-                products = data.products || products;
-                transactions = data.transactions || transactions;
-                gmailBackupEmail = data.gmailBackupEmail || "";
-                // load tax settings if present
-                taxRate = typeof data.taxRate === 'number' ? data.taxRate : taxRate;
-                taxEnabled = typeof data.taxEnabled === 'boolean' ? data.taxEnabled : taxEnabled;
-                // load shop info if present
-                shopInfo = data.shopInfo || shopInfo;
-                // load discount settings
-                discountType = data.discountType || discountType;
-                discountValue = typeof data.discountValue === 'number' ? data.discountValue : discountValue;
-                // load EmailJS config
-                emailJsConfig = data.emailJsConfig || emailJsConfig;
-                // load held bills
-                heldBills = data.heldBills || heldBills;
-                localStorage.setItem("retail_gmail_backup", gmailBackupEmail);
-            } catch(e) {}
+    async function persistData() {
+        const state = { id: 'main', products, transactions, gmailBackupEmail, taxRate, taxEnabled, shopInfo, discountType, discountValue, emailJsConfig, heldBills };
+        try {
+            const db = await openDB();
+            const tx = db.transaction(["appData"], "readwrite");
+            tx.objectStore("appData").put(state);
+        } catch(e) { console.error("Error saving to IndexedDB:", e); }
+    }
+
+    async function loadData() {
+        try {
+            const db = await openDB();
+            const tx = db.transaction(["appData"], "readonly");
+            const getReq = tx.objectStore("appData").get('main');
+            getReq.onsuccess = () => {
+                const data = getReq.result;
+                if(data) {
+                    products = data.products || products;
+                    transactions = data.transactions || transactions;
+                    gmailBackupEmail = data.gmailBackupEmail || "";
+                    taxRate = typeof data.taxRate === 'number' ? data.taxRate : taxRate;
+                    taxEnabled = typeof data.taxEnabled === 'boolean' ? data.taxEnabled : taxEnabled;
+                    shopInfo = data.shopInfo || shopInfo;
+                    discountType = data.discountType || discountType;
+                    discountValue = typeof data.discountValue === 'number' ? data.discountValue : discountValue;
+                    emailJsConfig = data.emailJsConfig || emailJsConfig;
+                    heldBills = data.heldBills || heldBills;
+                    localStorage.setItem("retail_gmail_backup", gmailBackupEmail);
+                }
+                initUI();
+            };
+            getReq.onerror = () => { initUI(); };
+        } catch(e) {
+            console.error("Error loading from IndexedDB:", e);
+            initUI();
         }
+    }
+
+    function initUI() {
         updateBackupUI();
         initializeTaxUI();
         initializeSettingsUI();
@@ -1325,8 +1610,7 @@
 
         setTimeout(()=> { 
             toast.classList.remove('show'); 
-            // wait for transition to finish before hiding totally
-            setTimeout(()=> { toast.style.opacity = "0"; toast.style.visibility = "hidden"; }, 400);
+            // wait for  toast.style.visibility = "hidden"; }, 400);
         }, 3000);
     }
 
@@ -1407,6 +1691,13 @@
             if(addrInp) addrInp.value = shopInfo.address || '';
             if(phoneInp) phoneInp.value = shopInfo.phone || '';
             if(logoInp) logoInp.value = shopInfo.logo || '';
+            // prefill current username in credential change fields
+            const curUser = document.getElementById('newLoginUsername');
+            if(curUser) curUser.value = getCredentials().username || '';
+            const cur1 = document.getElementById('newLoginPassword');
+            const cur2 = document.getElementById('newLoginPasswordConfirm');
+            if(cur1) cur1.value = '';
+            if(cur2) cur2.value = '';
         });
         closeBtn?.addEventListener('click', ()=>{ if(modal) modal.style.display = 'none'; });
         saveBtn?.addEventListener('click', ()=>{
@@ -1414,6 +1705,17 @@
             shopInfo.address = addrInp?.value || '';
             shopInfo.phone = phoneInp?.value || '';
             shopInfo.logo = logoInp?.value || '';
+            // save login credentials if provided
+            const newUser = document.getElementById('newLoginUsername')?.value.trim();
+            const newPw   = document.getElementById('newLoginPassword')?.value;
+            const newPw2  = document.getElementById('newLoginPasswordConfirm')?.value;
+            if(newUser || newPw) {
+                if(!newUser)  { showToast('Username cannot be empty', true); return; }
+                if(!newPw)    { showToast('Password cannot be empty', true); return; }
+                if(newPw !== newPw2) { showToast('Passwords do not match', true); return; }
+                saveCredentials(newUser, newPw);
+                showToast(`Login credentials updated for "${newUser}"`);
+            }
             // save EmailJS config
             if(emailJsEnabled) emailJsConfig.enabled = !!emailJsEnabled.checked;
             if(emailJsService) emailJsConfig.serviceId = emailJsService.value || '';
@@ -1676,11 +1978,6 @@
     });
 
     loadData();
-    renderInventoryTable();
-    renderCartUI();
-    renderHistory();
-    updateAnalytics();
-    checkLowStockAlerts();
 
     // Fallback delegated handlers: ensure critical header buttons work even if direct listeners failed
     document.addEventListener('click', (e)=>{
